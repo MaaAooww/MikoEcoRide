@@ -1,0 +1,10 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+
+# PHP / logs
+*.log
+
+# Secrets locaux éventuels
+config/config.local.php
