@@ -23,3 +23,9 @@
 
 - MongoDB Compass : mongodb://localhost:27017
 - Base : `ecoride_nosql`
+
+## Branching strategy
+
+- main: stable
+- develop: integration
+- feature/\*: one feature per branch
