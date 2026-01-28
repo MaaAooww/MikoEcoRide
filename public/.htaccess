@@ -1,9 +1,13 @@
-RewriteEngine On
+Options -Indexes
+DirectoryIndex index.php
 
-# Si fichier/dossier existe, on le sert directement
+RewriteEngine On
+RewriteBase /EcoRide/public/
+
+# Si le fichier/dossier existe physiquement, on le sert directement
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Sinon, on redirige vers index.php
+# Sinon, on envoie tout vers index.php (front controller)
 RewriteRule ^ index.php [L]
