@@ -80,8 +80,11 @@ final class AuthController
         ]);
 
         // Connexion automatique après inscription
-        $_SESSION['user_id'] = $newId;
-        $_SESSION['pseudo']  = $pseudo;
+        $_SESSION['user'] = [
+            'id_utilisateur' => (int)$newId,
+            'pseudo'         => $pseudo,
+            'email'          => $email,
+        ];
 
         header("Location: " . BASE_URL . "/");
         exit;
@@ -122,8 +125,11 @@ final class AuthController
             exit;
         }
 
-        $_SESSION['user_id'] = (int)$user['id_utilisateur'];
-        $_SESSION['pseudo']  = (string)$user['pseudo'];
+        $_SESSION['user'] = [
+            'id_utilisateur' => (int)$user['id_utilisateur'],
+            'pseudo'         => (string)$user['pseudo'],
+            'email'          => (string)$user['email'],
+        ];
 
         header("Location: " . BASE_URL . "/");
         exit;

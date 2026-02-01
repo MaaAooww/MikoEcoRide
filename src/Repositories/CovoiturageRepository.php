@@ -3,10 +3,15 @@
 
 final class CovoiturageRepository
 {
+    private PDO $pdo;
+
+    public function __construct(?PDO $pdo = null)
+    {
+        $this->pdo = $pdo ?? Database::pdo();
+    }
+
     public function search(?string $depart, ?string $arrivee, ?string $date, ?int $prixMax = null, ?bool $ecoOnly = null): array
     {
-        $pdo = Database::pdo();
-
         $sql = "
             SELECT
                 c.id_covoiturage,
@@ -55,15 +60,13 @@ final class CovoiturageRepository
 
         $sql .= " ORDER BY c.date_depart ASC, c.heure_depart ASC";
 
-        $stmt = $pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
 
     public function findById(int $id): ?array
     {
-        $pdo = Database::pdo();
-
         $sql = "
             SELECT
                 c.*,
@@ -79,9 +82,75 @@ final class CovoiturageRepository
             LIMIT 1
         ";
 
-        $stmt = $pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch();
         return $row ?: null;
+    }
+
+    // Verrouille le covoiturage pour éviter 2 réservations simultanées (transaction)
+    public function getCovoiturageForUpdate(int $idCovoiturage): array|false
+    {
+        $sql = "
+            SELECT *
+            FROM covoiturage
+            WHERE id_covoiturage = :idCovoiturage
+            FOR UPDATE
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['idCovoiturage' => $idCovoiturage]);
+
+        return $stmt->fetch();
+    }
+
+    // Compte le nombre de participants
+    public function countParticipants(int $idCovoiturage): int
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM participe
+            WHERE id_covoiturage = :idCovoiturage
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['idCovoiturage' => $idCovoiturage]);
+
+        return (int)$stmt->fetchColumn();
+    }
+
+    // Vérifie si l’utilisateur participe déjà
+    public function isAlreadyParticipant(int $idUtilisateur, int $idCovoiturage): bool
+    {
+        $sql = "
+            SELECT 1
+            FROM participe
+            WHERE id_utilisateur = :idUtilisateur
+            AND id_covoiturage = :idCovoiturage
+            LIMIT 1
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'idUtilisateur' => $idUtilisateur,
+            'idCovoiturage' => $idCovoiturage,
+        ]);
+
+        return (bool)$stmt->fetchColumn();
+    }
+
+    // Insère la participation
+    public function addParticipation(int $idUtilisateur, int $idCovoiturage): void
+    {
+        $sql = "
+            INSERT INTO participe (id_utilisateur, id_covoiturage)
+            VALUES (:idUtilisateur, :idCovoiturage)
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'idUtilisateur' => $idUtilisateur,
+            'idCovoiturage' => $idCovoiturage,
+        ]);
     }
 }

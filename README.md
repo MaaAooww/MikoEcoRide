@@ -36,15 +36,18 @@ Il respecte le cahier des charges fourni, notamment :
 ## Stack technique
 
 - **Frontend**
+
   - HTML5
   - CSS3
   - Bootstrap
 
 - **Backend**
+
   - PHP 8
   - PDO (requêtes préparées)
 
 - **Base de données**
+
   - MySQL
   - Modélisation MCD → MPD → SQL
 
@@ -55,5 +58,8 @@ Il respecte le cahier des charges fourni, notamment :
 
 ---
 
-## Structure du projet
+## Choix techniques
 
+Une table de transactions de crédits a été ajoutée lors de l’implémentation afin d’assurer la traçabilité et le respect des règles métier liées aux crédits utilisateurs.
+
+## Structure du projet

@@ -32,6 +32,9 @@ $router->get('/', [HomeController::class, 'index']);
 $router->get('/covoiturages', [CovoiturageController::class, 'list']);
 $router->get('/covoiturage', [CovoiturageController::class, 'detail']); // ?id=...
 
+$router->get('/covoiturage/participer', [CovoiturageController::class, 'participerConfirm']); // ?id=...
+$router->post('/covoiturage/participer', [CovoiturageController::class, 'participer']); // POST id_covoiturage
+
 $router->get('/register', [AuthController::class, 'registerForm']);
 $router->post('/register', [AuthController::class, 'register']);
 

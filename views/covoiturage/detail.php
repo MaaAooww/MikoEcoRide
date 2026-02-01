@@ -17,6 +17,26 @@
     <li><strong>Prix :</strong> <?= htmlspecialchars((string)$covoit['prix_personne']) ?> crédits</li>
   </ul>
 
+  <?php if (isset($_SESSION['user'])): ?>
+    <p>
+      <a
+        href="<?= BASE_URL ?>/covoiturage/participer?id=<?= (int)$covoit['id_covoiturage'] ?>"
+        class="btn btn-success"
+      >
+        Participer (<?= (int)$covoit['prix_personne'] ?> crédits)
+      </a>
+    </p>
+  <?php else: ?>
+    <p>
+      <a
+        href="<?= BASE_URL ?>/login"
+        class="btn btn-primary"
+      >
+        Se connecter pour participer
+      </a>
+    </p>
+  <?php endif; ?>
+
   <h2>Véhicule</h2>
   <?php if (!empty($covoit['modele'])): ?>
     <ul>

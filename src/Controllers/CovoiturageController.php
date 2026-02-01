@@ -39,4 +39,121 @@ final class CovoiturageController
 
         require __DIR__ . '/../../views/covoiturage/detail.php';
     }
+
+    public function participerConfirm(): void
+    {
+        // 1) Vérifier connexion
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        // 2) Lire l'id du covoiturage (dans l'URL: ?id=...)
+        $idCovoiturage = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        if ($idCovoiturage <= 0) {
+            http_response_code(400);
+            echo "Requête invalide (id manquant).";
+            return;
+        }
+
+        // 3) Charger le covoiturage pour afficher le prix à confirmer
+        $repo = new CovoiturageRepository();
+        $covoit = $repo->findById($idCovoiturage);
+
+        if (!$covoit) {
+            http_response_code(404);
+            echo "Covoiturage introuvable.";
+            return;
+        }
+
+        // 4) Variables attendues par la vue
+        $prixCredits = (int)$covoit['prix_personne'];
+        $error = null;
+
+        require __DIR__ . '/../../views/covoiturage/confirm_participation.php';
+    }
+
+    public function participer(): void
+    {
+        // 1) Vérifier connexion
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        // 2) Récupérer l'id du covoiturage (POST)
+        $idCovoiturage = isset($_POST['id_covoiturage']) ? (int)$_POST['id_covoiturage'] : 0;
+        if ($idCovoiturage <= 0) {
+            http_response_code(400);
+            echo "Requête invalide.";
+            return;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+
+        // 3) Connexion DB + transaction
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $covoitRepo = new CovoiturageRepository($pdo);
+            $userRepo   = new UtilisateurRepository($pdo);
+
+            // 4) Verrouiller le covoiturage
+            $covoit = $covoitRepo->getCovoiturageForUpdate($idCovoiturage);
+            if (!$covoit) {
+                throw new Exception("Covoiturage introuvable.");
+            }
+
+            // 5) Vérifier places restantes
+            $nbParticipants = $covoitRepo->countParticipants($idCovoiturage);
+            if ($nbParticipants >= (int)$covoit['nb_place']) {
+                throw new Exception("Il n'y a plus de places disponibles.");
+            }
+
+            // 6) Vérifier si déjà participant
+            if ($covoitRepo->isAlreadyParticipant($idUtilisateur, $idCovoiturage)) {
+                throw new Exception("Vous participez déjà à ce covoiturage.");
+            }
+
+            // 7) Vérifier solde crédits
+            $prix = (int)$covoit['prix_personne'];
+            $solde = $userRepo->getCreditBalance($idUtilisateur);
+
+            if ($solde < $prix) {
+                throw new Exception("Crédits insuffisants.");
+            }
+
+            // 8) Débiter les crédits
+            $userRepo->addCreditTransaction(
+                $idUtilisateur,
+                $idCovoiturage,
+                -$prix,
+                'Participation au covoiturage'
+            );
+
+            // 9) Ajouter la participation
+            $covoitRepo->addParticipation($idUtilisateur, $idCovoiturage);
+
+            // 10) Tout OK → commit
+            $pdo->commit();
+
+            header('Location: ' . BASE_URL . '/covoiturage?id=' . $idCovoiturage);
+            exit;
+
+        } catch (Exception $e) {
+            // Erreur → rollback
+            $pdo->rollBack();
+
+            // Réafficher la page de confirmation avec message
+            $error = $e->getMessage();
+
+            $repo = new CovoiturageRepository();
+            $covoit = $repo->findById($idCovoiturage);
+
+            $prixCredits = $covoit ? (int)$covoit['prix_personne'] : 0;
+
+            require __DIR__ . '/../../views/covoiturage/confirm_participation.php';
+        }
+    }
 }

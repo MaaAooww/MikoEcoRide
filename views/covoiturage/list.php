@@ -17,7 +17,7 @@
   </p>
 
   <p>
-    <a href="/">← Nouvelle recherche</a>
+    <a href="<?= BASE_URL ?>/">← Nouvelle recherche</a>
   </p>
 
   <?php if (empty($results)): ?>
@@ -52,7 +52,7 @@
           <td><?= htmlspecialchars((string)$row['prix_personne']) ?> crédits</td>
           <td><?= $eco ? 'Oui' : 'Non' ?></td>
           <td>
-            <a href="/covoiturage?id=<?= (int)$row['id_covoiturage'] ?>">Détail</a>
+            <a href="<?= BASE_URL ?>/covoiturage?id=<?= (int)$row['id_covoiturage'] ?>">Détail</a>
           </td>
         </tr>
       <?php endforeach; ?>

@@ -1,5 +1,8 @@
 <?php
 // config/config.php
+
+define('COST_PARTICIPATION', 2);
+
 return [
     'db' => [
         'host' => '127.0.0.1',
@@ -10,4 +13,5 @@ return [
         'charset' => 'utf8mb4',
     ],
 ];
+
 
