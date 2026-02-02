@@ -20,6 +20,10 @@ require __DIR__ . '/../src/Controllers/CovoiturageController.php';
 require __DIR__ . '/../src/Repositories/UtilisateurRepository.php';
 require __DIR__ . '/../src/Repositories/CovoiturageRepository.php';
 
+require __DIR__ . '/../src/Controllers/StaticController.php';
+
+require __DIR__ . '/../src/Controllers/AccountController.php';
+
 /*
 |--------------------------------------------------------------------------
 | Définition des routes
@@ -42,6 +46,15 @@ $router->get('/login', [AuthController::class, 'loginForm']);
 $router->post('/login', [AuthController::class, 'login']);
 
 $router->post('/logout', [AuthController::class, 'logout']);
+
+$router->get('/contact', [StaticController::class, 'contact']);
+$router->get('/mentions-legales', [StaticController::class, 'mentionsLegales']);
+
+$router->get('/account', [AccountController::class, 'index']);
+$router->post('/account/role', [AccountController::class, 'updateDriverRole']);
+
+$router->get('/account/vehicles', [AccountController::class, 'vehicles']);
+$router->post('/account/vehicles', [AccountController::class, 'addVehicle']);
 
 /*
 |--------------------------------------------------------------------------
