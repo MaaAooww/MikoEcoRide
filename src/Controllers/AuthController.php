@@ -67,17 +67,49 @@ final class AuthController
         // Hash bcrypt
         $hash = password_hash($password, PASSWORD_BCRYPT);
 
-        $newId = $repo->create([
-            'nom'            => $nom,
-            'prenom'         => $prenom,
-            'email'          => $email,
-            'password_hash'  => $hash,
-            'telephone'      => $telephone,
-            'adresse'        => $adresse,
-            'date_naissance' => $dateNaissance,
-            'photo'          => $photo,
-            'pseudo'         => $pseudo,
-        ]);
+                $pdo = Database::pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $repo = new UtilisateurRepository($pdo);
+
+            // Empêcher doublons (ta table n’a pas de UNIQUE => on le gère côté code)
+            if ($repo->findByEmail($email)) {
+                throw new Exception("Cet email est déjà utilisé.");
+            }
+            if ($repo->findByPseudo($pseudo)) {
+                throw new Exception("Ce pseudo est déjà utilisé.");
+            }
+
+            // Hash bcrypt
+            $hash = password_hash($password, PASSWORD_BCRYPT);
+
+            $newId = $repo->create([
+                'nom'            => $nom,
+                'prenom'         => $prenom,
+                'email'          => $email,
+                'password_hash'  => $hash,
+                'telephone'      => $telephone,
+                'adresse'        => $adresse,
+                'date_naissance' => $dateNaissance,
+                'photo'          => $photo,
+                'pseudo'         => $pseudo,
+            ]);
+
+            // Rôle de base
+            $repo->addRole((int)$newId, 'UTILISATEUR');
+
+            // 20 crédits offerts à la création
+            $repo->addCreditTransaction((int)$newId, null, 20, 'Crédits offerts à la création du compte');
+
+            $pdo->commit();
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $_SESSION['flash_error'] = $e->getMessage();
+            header("Location: " . BASE_URL . "/register");
+            exit;
+        }
 
         // Connexion automatique après inscription
         $_SESSION['user'] = [

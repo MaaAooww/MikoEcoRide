@@ -7,7 +7,7 @@
 <body>
   <h1>Détail du covoiturage #<?= (int)$covoit['id_covoiturage'] ?></h1>
 
-  <p><a href="/covoiturages?depart=<?= urlencode((string)$covoit['lieu_depart']) ?>&arrivee=<?= urlencode((string)$covoit['lieu_arrivee']) ?>&date=<?= urlencode((string)$covoit['date_depart']) ?>">← Retour liste</a></p>
+  <p><a href="<?= BASE_URL ?>/covoiturages?depart=<?= urlencode((string)$covoit['lieu_depart']) ?>&arrivee=<?= urlencode((string)$covoit['lieu_arrivee']) ?>&date=<?= urlencode((string)$covoit['date_depart']) ?>">← Retour liste</a></p>
 
   <ul>
     <li><strong>Départ :</strong> <?= htmlspecialchars((string)$covoit['lieu_depart']) ?> (<?= htmlspecialchars((string)$covoit['date_depart']) ?> <?= htmlspecialchars((string)$covoit['heure_depart']) ?>)</li>

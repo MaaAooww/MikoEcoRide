@@ -99,4 +99,110 @@ final class UtilisateurRepository
         ]);
     }
 
+    public function addRole(int $idUtilisateur, string $roleLibelle): void
+    {
+        // Trouver l'id_role à partir du libellé
+        $stmt = $this->pdo->prepare("SELECT id_role FROM role WHERE libelle = :libelle LIMIT 1");
+        $stmt->execute([':libelle' => $roleLibelle]);
+        $idRole = (int)$stmt->fetchColumn();
+
+        if ($idRole <= 0) {
+            throw new Exception("Rôle introuvable: " . $roleLibelle);
+        }
+
+        // Eviter doublon
+        $sql = "SELECT 1 FROM possede WHERE id_utilisateur = :u AND id_role = :r LIMIT 1";
+        $check = $this->pdo->prepare($sql);
+        $check->execute([':u' => $idUtilisateur, ':r' => $idRole]);
+        if ($check->fetchColumn()) {
+            return;
+        }
+
+        $ins = $this->pdo->prepare("INSERT INTO possede (id_utilisateur, id_role) VALUES (:u, :r)");
+        $ins->execute([':u' => $idUtilisateur, ':r' => $idRole]);
+    }
+
+    public function getRoleLibelles(int $idUtilisateur): array
+    {
+        $sql = "
+            SELECT r.libelle
+            FROM possede p
+            INNER JOIN role r ON r.id_role = p.id_role
+            WHERE p.id_utilisateur = :u
+            ORDER BY r.libelle
+        ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':u' => $idUtilisateur]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+    }
+
+    public function hasRole(int $idUtilisateur, string $roleLibelle): bool
+    {
+        $sql = "
+            SELECT 1
+            FROM possede p
+            INNER JOIN role r ON r.id_role = p.id_role
+            WHERE p.id_utilisateur = :u AND r.libelle = :lib
+            LIMIT 1
+        ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':u' => $idUtilisateur, ':lib' => $roleLibelle]);
+        return (bool)$stmt->fetchColumn();
+    }
+
+        public function getMarques(): array
+    {
+        $stmt = $this->pdo->query("SELECT id_marque, libelle FROM marque ORDER BY libelle");
+        return $stmt->fetchAll() ?: [];
+    }
+
+    public function getVehiclesByUser(int $idUtilisateur): array
+    {
+        $sql = "
+            SELECT
+                v.id_voiture, v.modele, v.immatriculation, v.energie, v.couleur, v.date_premiere_immatriculation,
+                m.libelle AS marque
+            FROM gere g
+            INNER JOIN voiture v ON v.id_voiture = g.id_voiture
+            LEFT JOIN detient d ON d.id_voiture = v.id_voiture
+            LEFT JOIN marque m ON m.id_marque = d.id_marque
+            WHERE g.id_utilisateur = :u
+            ORDER BY v.id_voiture DESC
+        ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':u' => $idUtilisateur]);
+        return $stmt->fetchAll() ?: [];
+    }
+
+    public function addVehicleForUser(int $idUtilisateur, array $data): int
+    {
+        // data: modele, immatriculation, energie, couleur, date_premiere_immatriculation, id_marque|null
+        $sql = "
+            INSERT INTO voiture (modele, immatriculation, energie, couleur, date_premiere_immatriculation)
+            VALUES (:modele, :immatriculation, :energie, :couleur, :date_imm)
+        ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':modele' => $data['modele'],
+            ':immatriculation' => $data['immatriculation'],
+            ':energie' => $data['energie'],
+            ':couleur' => $data['couleur'],
+            ':date_imm' => $data['date_premiere_immatriculation'],
+        ]);
+
+        $idVoiture = (int)$this->pdo->lastInsertId();
+
+        // Lien gere
+        $stmt2 = $this->pdo->prepare("INSERT INTO gere (id_utilisateur, id_voiture) VALUES (:u, :v)");
+        $stmt2->execute([':u' => $idUtilisateur, ':v' => $idVoiture]);
+
+        // Marque optionnelle
+        $idMarque = isset($data['id_marque']) ? (int)$data['id_marque'] : 0;
+        if ($idMarque > 0) {
+            $stmt3 = $this->pdo->prepare("INSERT INTO detient (id_voiture, id_marque) VALUES (:v, :m)");
+            $stmt3->execute([':v' => $idVoiture, ':m' => $idMarque]);
+        }
+
+        return $idVoiture;
+    }
 }
