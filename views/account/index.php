@@ -47,7 +47,17 @@
     <button type="submit">Enregistrer</button>
   </form>
 
+  <?php if ($isDriver): ?>
+    <hr>
+    <h2>Chauffeur</h2>
+    <p><a href="<?= BASE_URL ?>/account/trips/new">Créer un covoiturage</a></p>
+    <p><a href="<?= BASE_URL ?>/account/vehicles">Gérer mes véhicules</a></p>
+  <?php endif; ?>
+
+  <p><a href="<?= BASE_URL ?>/account/history">Voir mon historique</a></p>
+
   <hr>
+
   <footer>
     <p>Contact : <a href="mailto:contact@ecoride.fr">contact@ecoride.fr</a></p>
     <p><a href="<?= BASE_URL ?>/mentions-legales">Mentions légales</a></p>

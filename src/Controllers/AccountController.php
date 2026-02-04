@@ -146,4 +146,387 @@ final class AccountController
             exit;
         }
     }
+
+    public function newTrip(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+
+        $repoUser = new UtilisateurRepository();
+        $roles = $repoUser->getRoleLibelles($idUtilisateur);
+
+        if (!in_array('CHAUFFEUR', $roles, true)) {
+            header('Location: ' . BASE_URL . '/account');
+            exit;
+        }
+
+        $vehicles = $repoUser->getVehiclesByUser($idUtilisateur);
+
+        $error = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_error']);
+
+        require __DIR__ . '/../../views/account/new_trip.php';
+    }
+
+    public function createTrip(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+
+        $repoUser = new UtilisateurRepository();
+        $roles = $repoUser->getRoleLibelles($idUtilisateur);
+
+        if (!in_array('CHAUFFEUR', $roles, true)) {
+            header('Location: ' . BASE_URL . '/account');
+            exit;
+        }
+
+        // Champs
+        $lieuDepart   = trim((string)($_POST['lieu_depart'] ?? ''));
+        $lieuArrivee  = trim((string)($_POST['lieu_arrivee'] ?? ''));
+        $dateDepart   = trim((string)($_POST['date_depart'] ?? ''));
+        $heureDepart  = trim((string)($_POST['heure_depart'] ?? ''));
+        $dateArrivee  = trim((string)($_POST['date_arrivee'] ?? ''));
+        $heureArrivee = trim((string)($_POST['heure_arrivee'] ?? ''));
+        $nbPlace      = (int)($_POST['nb_place'] ?? 0);
+        $prixPers     = (int)($_POST['prix_personne'] ?? 0);
+        $idVoiture    = (int)($_POST['id_voiture'] ?? 0);
+
+        if ($lieuDepart === '' || $lieuArrivee === '' || $dateDepart === '' || $heureDepart === '' || $nbPlace <= 0 || $idVoiture <= 0) {
+            $_SESSION['flash_error'] = "Champs obligatoires manquants (départ/arrivée/date/heure/places/véhicule).";
+            header('Location: ' . BASE_URL . '/account/trips/new');
+            exit;
+        }
+
+        // Vérifie que la voiture appartient au chauffeur (via gere)
+        $myVehicles = $repoUser->getVehiclesByUser($idUtilisateur);
+        $owned = false;
+        foreach ($myVehicles as $v) {
+            if ((int)$v['id_voiture'] === $idVoiture) { $owned = true; break; }
+        }
+        if (!$owned) {
+            $_SESSION['flash_error'] = "Véhicule invalide (il doit t’appartenir).";
+            header('Location: ' . BASE_URL . '/account/trips/new');
+            exit;
+        }
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $repoCov = new CovoiturageRepository($pdo);
+
+            $idCovoiturage = $repoCov->create([
+                'date_depart'   => $dateDepart,
+                'heure_depart'  => $heureDepart,
+                'lieu_depart'   => $lieuDepart,
+                'date_arrivee'  => $dateArrivee,
+                'heure_arrivee' => $heureArrivee,
+                'lieu_arrivee'  => $lieuArrivee,
+                'statut'        => 'PLANIFIE',
+                'nb_place'      => $nbPlace,
+                'prix_personne' => $prixPers,
+            ]);
+
+            $repoCov->linkVehicle($idCovoiturage, $idVoiture);
+
+            $pdo->commit();
+
+            header('Location: ' . BASE_URL . '/covoiturage?id=' . $idCovoiturage);
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $_SESSION['flash_error'] = "Erreur: " . $e->getMessage();
+            header('Location: ' . BASE_URL . '/account/trips/new');
+            exit;
+        }
+    }
+
+    public function history(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+
+        $pdo = Database::pdo();
+        $repoCov = new CovoiturageRepository($pdo);
+        $repoUser = new UtilisateurRepository($pdo);
+
+        $tripsPassenger = $repoCov->findTripsAsPassenger($idUtilisateur);
+        $tripsDriver = $repoCov->findTripsAsDriver($idUtilisateur);
+
+        $success = $_SESSION['flash_success'] ?? null;
+        $error = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+        require __DIR__ . '/../../views/account/history.php';
+    }
+
+    public function cancelParticipation(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+        $idCovoiturage = (int)($_POST['id_covoiturage'] ?? 0);
+
+        if ($idCovoiturage <= 0) {
+            $_SESSION['flash_error'] = "Covoiturage invalide.";
+            header('Location: ' . BASE_URL . '/account/history');
+            exit;
+        }
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $repoCov = new CovoiturageRepository($pdo);
+            $repoUser = new UtilisateurRepository($pdo);
+
+            if (!$repoCov->isUserParticipant($idUtilisateur, $idCovoiturage)) {
+                throw new Exception("Tu ne participes pas à ce covoiturage.");
+            }
+
+            $trip = $repoCov->getTripById($idCovoiturage);
+            if (!$trip) {
+                throw new Exception("Covoiturage introuvable.");
+            }
+
+            // 1) suppression participation
+            $repoCov->deleteParticipation($idUtilisateur, $idCovoiturage);
+
+            // 2) remboursement crédits
+            $prix = (int)$trip['prix_personne'];
+            $repoUser->addCreditTransaction(
+                $idUtilisateur,
+                $idCovoiturage,
+                +$prix,
+                "Remboursement annulation participation covoiturage #{$idCovoiturage}"
+            );
+
+            // 3) mail (simulation)
+            error_log("MAIL(SIMULATION) -> Annulation participation utilisateur #{$idUtilisateur} sur covoiturage #{$idCovoiturage}");
+
+            $pdo->commit();
+
+            $_SESSION['flash_success'] = "Participation annulée. Crédits remboursés (+{$prix}).";
+            header('Location: ' . BASE_URL . '/account/history');
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $_SESSION['flash_error'] = "Erreur : " . $e->getMessage();
+            header('Location: ' . BASE_URL . '/account/history');
+            exit;
+        }
+    }
+
+    public function cancelTripAsDriver(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+        $idCovoiturage = (int)($_POST['id_covoiturage'] ?? 0);
+
+        if ($idCovoiturage <= 0) {
+            $_SESSION['flash_error'] = "Covoiturage invalide.";
+            header('Location: ' . BASE_URL . '/account/history');
+            exit;
+        }
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $repoCov = new CovoiturageRepository($pdo);
+            $repoUser = new UtilisateurRepository($pdo);
+
+            if (!$repoCov->isUserDriverOfTrip($idUtilisateur, $idCovoiturage)) {
+                throw new Exception("Tu n’es pas le chauffeur de ce covoiturage.");
+            }
+
+            $trip = $repoCov->getTripById($idCovoiturage);
+            if (!$trip) {
+                throw new Exception("Covoiturage introuvable.");
+            }
+
+            // 1) Annule le trajet
+            $repoCov->setTripStatus($idCovoiturage, 'ANNULE');
+
+            // 2) Rembourse tous les participants
+            $prix = (int)$trip['prix_personne'];
+            $participants = $repoCov->getParticipantsForTrip($idCovoiturage);
+
+            foreach ($participants as $p) {
+                $idP = (int)$p['id_utilisateur'];
+                $repoUser->addCreditTransaction(
+                    $idP,
+                    $idCovoiturage,
+                    +$prix,
+                    "Remboursement annulation covoiturage #{$idCovoiturage} (chauffeur)"
+                );
+
+                // mail (simulation)
+                error_log("MAIL(SIMULATION) -> Annulation covoiturage #{$idCovoiturage} vers {$p['email']} ({$p['pseudo']})");
+            }
+
+            // 3) Supprime les participations (places libérées)
+            $repoCov->deleteAllParticipationsForTrip($idCovoiturage);
+
+            $pdo->commit();
+
+            $_SESSION['flash_success'] = "Covoiturage annulé. Participants remboursés (+{$prix} chacun).";
+            header('Location: ' . BASE_URL . '/account/history');
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $_SESSION['flash_error'] = "Erreur : " . $e->getMessage();
+            header('Location: ' . BASE_URL . '/account/history');
+            exit;
+        }
+    }
+
+    public function validateTrips(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+
+        $pdo = Database::pdo();
+        $repoCov = new CovoiturageRepository($pdo);
+
+        $tripsToValidate = $repoCov->findTripsToValidateForUser($idUtilisateur);
+
+        $success = $_SESSION['flash_success'] ?? null;
+        $error = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+        require __DIR__ . '/../../views/account/validate_trips.php';
+    }
+
+    public function submitTripValidation(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+        $idCovoiturage = (int)($_POST['id_covoiturage'] ?? 0);
+        $action = trim((string)($_POST['action'] ?? '')); // 'VALIDE' ou 'INCIDENT'
+        $note = isset($_POST['note']) && $_POST['note'] !== '' ? (int)$_POST['note'] : null;
+        $commentaire = trim((string)($_POST['commentaire'] ?? ''));
+
+        if ($idCovoiturage <= 0 || ($action !== 'VALIDE' && $action !== 'INCIDENT')) {
+            $_SESSION['flash_error'] = "Données invalides.";
+            header('Location: ' . BASE_URL . '/account/validate-trips');
+            exit;
+        }
+
+        if ($action === 'INCIDENT' && $commentaire === '') {
+            $_SESSION['flash_error'] = "Commentaire obligatoire en cas d’incident.";
+            header('Location: ' . BASE_URL . '/account/validate-trips');
+            exit;
+        }
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $repoCov = new CovoiturageRepository($pdo);
+            $repoUser = new UtilisateurRepository($pdo);
+
+            if (!$repoCov->isUserParticipant($idUtilisateur, $idCovoiturage)) {
+                throw new Exception("Tu ne participes pas à ce covoiturage.");
+            }
+
+            $trip = $repoCov->getTripById($idCovoiturage);
+            if (!$trip) {
+                throw new Exception("Covoiturage introuvable.");
+            }
+
+            if (($trip['statut'] ?? '') !== 'TERMINE') {
+                throw new Exception("Ce covoiturage n’est pas en attente de validation.");
+            }
+
+            if ($repoCov->hasUserAlreadyVoted($idUtilisateur, $idCovoiturage)) {
+                throw new Exception("Tu as déjà envoyé ton avis pour ce covoiturage.");
+            }
+
+            if ($action === 'VALIDE') {
+                // Note recommandée (1..5). On reste minimal : si vide, on accepte null.
+                if ($note !== null && ($note < 1 || $note > 5)) {
+                    throw new Exception("La note doit être entre 1 et 5.");
+                }
+            } else {
+                // incident : note optionnelle mais pas obligatoire
+            }
+
+            $repoUser->createAvisAndDepose(
+                $idUtilisateur,
+                $idCovoiturage,
+                $commentaire,
+                $note,
+                $action
+            );
+
+            // Recalcule l'état global du covoiturage
+            if ($repoCov->hasIncidentForTrip($idCovoiturage)) {
+                $repoCov->setTripStatus($idCovoiturage, 'INCIDENT');
+            } else {
+                $nbParticipants = $repoCov->countParticipants($idCovoiturage);
+                $nbAvis = $repoCov->countAvisForTrip($idCovoiturage);
+
+                if ($nbParticipants > 0 && $nbAvis >= $nbParticipants) {
+                    // Tous ont validé (et pas d’incident) => VALIDE + crédits chauffeur
+                    $repoCov->setTripStatus($idCovoiturage, 'VALIDE');
+
+                    $idDriver = $repoCov->getDriverIdForTrip($idCovoiturage);
+                    if ($idDriver === null) {
+                        throw new Exception("Chauffeur introuvable pour créditer.");
+                    }
+
+                    $gain = (int)$trip['prix_personne'] * $nbParticipants;
+                    $repoUser->addCreditTransaction(
+                        $idDriver,
+                        $idCovoiturage,
+                        +$gain,
+                        "Gain covoiturage #{$idCovoiturage} (validation passagers)"
+                    );
+                }
+            }
+
+            $pdo->commit();
+            $_SESSION['flash_success'] = "Merci, ton retour a été enregistré.";
+            header('Location: ' . BASE_URL . '/account/validate-trips');
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $_SESSION['flash_error'] = "Erreur : " . $e->getMessage();
+            header('Location: ' . BASE_URL . '/account/validate-trips');
+            exit;
+        }
+    }
 }

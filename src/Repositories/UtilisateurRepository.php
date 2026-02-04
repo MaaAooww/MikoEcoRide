@@ -205,4 +205,27 @@ final class UtilisateurRepository
 
         return $idVoiture;
     }
+
+    public function createAvisAndDepose(int $idUtilisateur, int $idCovoiturage, string $commentaire, ?int $note, string $statut): int
+    {
+        $sqlAvis = "INSERT INTO avis (id_covoiturage, commentaire, note, statut) VALUES (:covoit, :com, :note, :statut)";
+        $stmt = $this->pdo->prepare($sqlAvis);
+        $stmt->execute([
+            ':covoit' => $idCovoiturage,
+            ':com'    => $commentaire,
+            ':note'   => $note,
+            ':statut' => $statut
+        ]);
+
+        $idAvis = (int)$this->pdo->lastInsertId();
+
+        $sqlDepose = "INSERT INTO depose (id_utilisateur, id_avis) VALUES (:u, :a)";
+        $stmt2 = $this->pdo->prepare($sqlDepose);
+        $stmt2->execute([
+            ':u' => $idUtilisateur,
+            ':a' => $idAvis
+        ]);
+
+        return $idAvis;
+    }
 }

@@ -17,24 +17,59 @@
     <li><strong>Prix :</strong> <?= htmlspecialchars((string)$covoit['prix_personne']) ?> crédits</li>
   </ul>
 
-  <?php if (isset($_SESSION['user'])): ?>
-    <p>
-      <a
-        href="<?= BASE_URL ?>/covoiturage/participer?id=<?= (int)$covoit['id_covoiturage'] ?>"
-        class="btn btn-success"
-      >
-        Participer (<?= (int)$covoit['prix_personne'] ?> crédits)
-      </a>
-    </p>
+  <?php
+    $statut = (string)($covoit['statut'] ?? '');
+  ?>
+
+  <?php if (!empty($isDriverOfTrip)): ?>
+
+    <h2>Actions chauffeur</h2>
+
+    <?php if ($statut === 'PLANIFIE'): ?>
+      <form method="post" action="<?= BASE_URL ?>/covoiturage/start">
+        <input type="hidden" name="id_covoiturage" value="<?= (int)$covoit['id_covoiturage'] ?>">
+        <button type="submit">Démarrer le covoiturage</button>
+      </form>
+    <?php elseif ($statut === 'EN_COURS'): ?>
+      <form method="post" action="<?= BASE_URL ?>/covoiturage/finish">
+        <input type="hidden" name="id_covoiturage" value="<?= (int)$covoit['id_covoiturage'] ?>">
+        <button type="submit">Terminer le covoiturage</button>
+      </form>
+    <?php elseif ($statut === 'TERMINE'): ?>
+      <p><strong>Trajet terminé.</strong> En attente de validation des passagers.</p>
+    <?php elseif ($statut === 'VALIDE'): ?>
+      <p><strong>Trajet validé.</strong> Crédits chauffeur mis à jour.</p>
+    <?php elseif ($statut === 'INCIDENT'): ?>
+      <p style="color:red;"><strong>Incident signalé.</strong> Un employé doit traiter la situation (US12).</p>
+    <?php endif; ?>
+
   <?php else: ?>
-    <p>
-      <a
-        href="<?= BASE_URL ?>/login"
-        class="btn btn-primary"
-      >
-        Se connecter pour participer
-      </a>
-    </p>
+
+    <?php if (isset($_SESSION['user'])): ?>
+
+      <?php if ($statut === 'PLANIFIE'): ?>
+        <p>
+          <a
+            href="<?= BASE_URL ?>/covoiturage/participer?id=<?= (int)$covoit['id_covoiturage'] ?>"
+            class="btn btn-success"
+          >
+            Participer (<?= (int)$covoit['prix_personne'] ?> crédits)
+          </a>
+        </p>
+      <?php else: ?>
+        <p><em>Ce covoiturage n’est pas disponible à la participation (statut : <?= htmlspecialchars($statut) ?>).</em></p>
+      <?php endif; ?>
+
+    <?php else: ?>
+
+      <p>
+        <a href="<?= BASE_URL ?>/login" class="btn btn-primary">
+          Se connecter pour participer
+        </a>
+      </p>
+
+    <?php endif; ?>
+
   <?php endif; ?>
 
   <h2>Véhicule</h2>

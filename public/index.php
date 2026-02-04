@@ -56,6 +56,25 @@ $router->post('/account/role', [AccountController::class, 'updateDriverRole']);
 $router->get('/account/vehicles', [AccountController::class, 'vehicles']);
 $router->post('/account/vehicles', [AccountController::class, 'addVehicle']);
 
+$router->get('/account/trips/new', [AccountController::class, 'newTrip']);
+$router->post('/account/trips/new', [AccountController::class, 'createTrip']);
+
+$router->get('/account/history', [AccountController::class, 'history']);
+
+$router->post('/account/history/cancel-participation', [AccountController::class, 'cancelParticipation']);
+$router->post('/account/history/cancel-trip', [AccountController::class, 'cancelTripAsDriver']);
+
+// US11 Chauffeur : démarrer / terminer
+$router->post('/covoiturage/start', [CovoiturageController::class, 'startTrip']);
+$router->post('/covoiturage/finish', [CovoiturageController::class, 'finishTrip']);
+
+// US11 Passager : valider / incident
+$router->get('/account/validate-trips', [AccountController::class, 'validateTrips']);
+$router->post('/account/validate-trips', [AccountController::class, 'submitTripValidation']);
+
+$router->post('/covoiturage/start', [CovoiturageController::class, 'startTrip']);
+$router->post('/covoiturage/finish', [CovoiturageController::class, 'finishTrip']);
+
 /*
 |--------------------------------------------------------------------------
 | Normalisation du chemin (indispensable sous /EcoRide/public)

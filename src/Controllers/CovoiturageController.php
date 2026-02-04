@@ -37,8 +37,16 @@ final class CovoiturageController
             return;
         }
 
+        // US11 : savoir si l'utilisateur connecté est le chauffeur de ce covoiturage
+        $isDriverOfTrip = false;
+        if (isset($_SESSION['user'])) {
+            $idDriver = $repo->getDriverIdForTrip($id); // méthode à ajouter dans CovoiturageRepository
+            $isDriverOfTrip = ($idDriver !== null) && ((int)$_SESSION['user']['id_utilisateur'] === (int)$idDriver);
+        }
+
         require __DIR__ . '/../../views/covoiturage/detail.php';
     }
+
 
     public function participerConfirm(): void
     {
@@ -154,6 +162,111 @@ final class CovoiturageController
             $prixCredits = $covoit ? (int)$covoit['prix_personne'] : 0;
 
             require __DIR__ . '/../../views/covoiturage/confirm_participation.php';
+        }
+    }
+
+    public function startTrip(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idCovoiturage = isset($_POST['id_covoiturage']) ? (int)$_POST['id_covoiturage'] : 0;
+        if ($idCovoiturage <= 0) {
+            http_response_code(400);
+            echo "Requête invalide.";
+            return;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $repo = new CovoiturageRepository($pdo);
+
+            $trip = $repo->getTripById($idCovoiturage);
+            if (!$trip) {
+                throw new Exception("Covoiturage introuvable.");
+            }
+
+            $idDriver = $repo->getDriverIdForTrip($idCovoiturage);
+            if ($idDriver === null || (int)$idDriver !== $idUtilisateur) {
+                throw new Exception("Action interdite : vous n’êtes pas le chauffeur.");
+            }
+
+            if (($trip['statut'] ?? '') !== 'PLANIFIE') {
+                throw new Exception("Le covoiturage doit être PLANIFIE pour démarrer.");
+            }
+
+            $repo->setTripStatus($idCovoiturage, 'EN_COURS');
+
+            $pdo->commit();
+
+            header('Location: ' . BASE_URL . '/covoiturage?id=' . $idCovoiturage);
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            http_response_code(400);
+            echo "Erreur : " . htmlspecialchars($e->getMessage());
+            return;
+        }
+    }
+
+    public function finishTrip(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $idCovoiturage = isset($_POST['id_covoiturage']) ? (int)$_POST['id_covoiturage'] : 0;
+        if ($idCovoiturage <= 0) {
+            http_response_code(400);
+            echo "Requête invalide.";
+            return;
+        }
+
+        $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+
+        try {
+            $repo = new CovoiturageRepository($pdo);
+
+            $trip = $repo->getTripById($idCovoiturage);
+            if (!$trip) {
+                throw new Exception("Covoiturage introuvable.");
+            }
+
+            $idDriver = $repo->getDriverIdForTrip($idCovoiturage);
+            if ($idDriver === null || (int)$idDriver !== $idUtilisateur) {
+                throw new Exception("Action interdite : vous n’êtes pas le chauffeur.");
+            }
+
+            if (($trip['statut'] ?? '') !== 'EN_COURS') {
+                throw new Exception("Le covoiturage doit être EN_COURS pour terminer.");
+            }
+
+            $repo->setTripStatus($idCovoiturage, 'TERMINE');
+
+            // (Optionnel) simulation d'envoi mail aux passagers
+            error_log("MAIL(SIMULATION) -> Trajet #{$idCovoiturage} terminé. Demande validation aux passagers.");
+
+            $pdo->commit();
+
+            header('Location: ' . BASE_URL . '/covoiturage?id=' . $idCovoiturage);
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            http_response_code(400);
+            echo "Erreur : " . htmlspecialchars($e->getMessage());
+            return;
         }
     }
 }
