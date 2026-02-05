@@ -338,23 +338,28 @@ final class CovoiturageRepository
 
     public function findTripsToValidateForUser(int $idUtilisateur): array
     {
-        // trajets TERMINE où user participe et n’a pas encore déposé d’avis
         $sql = "
             SELECT c.*
             FROM covoiturage c
             INNER JOIN participe p ON p.id_covoiturage = c.id_covoiturage
-            WHERE p.id_utilisateur = :u
+            WHERE p.id_utilisateur = :u1
             AND c.statut = 'TERMINE'
             AND NOT EXISTS (
                 SELECT 1
                 FROM avis a
                 INNER JOIN depose d ON d.id_avis = a.id_avis
-                WHERE d.id_utilisateur = :u AND a.id_covoiturage = c.id_covoiturage
+                WHERE d.id_utilisateur = :u2
+                    AND a.id_covoiturage = c.id_covoiturage
             )
             ORDER BY c.date_depart DESC, c.heure_depart DESC
         ";
+
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':u' => $idUtilisateur]);
+        $stmt->execute([
+            ':u1' => $idUtilisateur,
+            ':u2' => $idUtilisateur,
+        ]);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

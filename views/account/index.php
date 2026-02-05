@@ -54,6 +54,7 @@
     <p><a href="<?= BASE_URL ?>/account/vehicles">Gérer mes véhicules</a></p>
   <?php endif; ?>
 
+  <p><a href="<?= BASE_URL ?>/account/validate-trips">Valider mes trajets</a></p>
   <p><a href="<?= BASE_URL ?>/account/history">Voir mon historique</a></p>
 
   <hr>

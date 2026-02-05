@@ -15,14 +15,12 @@ require __DIR__ . '/../src/Core/Router.php';
 require __DIR__ . '/../src/Controllers/HomeController.php';
 require __DIR__ . '/../src/Controllers/AuthController.php';
 require __DIR__ . '/../src/Controllers/CovoiturageController.php';
+require __DIR__ . '/../src/Controllers/StaticController.php';
+require __DIR__ . '/../src/Controllers/AccountController.php';
 
 // Repositories
 require __DIR__ . '/../src/Repositories/UtilisateurRepository.php';
 require __DIR__ . '/../src/Repositories/CovoiturageRepository.php';
-
-require __DIR__ . '/../src/Controllers/StaticController.php';
-
-require __DIR__ . '/../src/Controllers/AccountController.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -60,7 +58,6 @@ $router->get('/account/trips/new', [AccountController::class, 'newTrip']);
 $router->post('/account/trips/new', [AccountController::class, 'createTrip']);
 
 $router->get('/account/history', [AccountController::class, 'history']);
-
 $router->post('/account/history/cancel-participation', [AccountController::class, 'cancelParticipation']);
 $router->post('/account/history/cancel-trip', [AccountController::class, 'cancelTripAsDriver']);
 
@@ -72,41 +69,46 @@ $router->post('/covoiturage/finish', [CovoiturageController::class, 'finishTrip'
 $router->get('/account/validate-trips', [AccountController::class, 'validateTrips']);
 $router->post('/account/validate-trips', [AccountController::class, 'submitTripValidation']);
 
-$router->post('/covoiturage/start', [CovoiturageController::class, 'startTrip']);
-$router->post('/covoiturage/finish', [CovoiturageController::class, 'finishTrip']);
-
 /*
 |--------------------------------------------------------------------------
 | Normalisation du chemin (indispensable sous /EcoRide/public)
 |--------------------------------------------------------------------------
 */
-
-// URI demandée (ex: /EcoRide/public/covoiturages)
 $uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
-
-// SCRIPT_NAME (ex: /EcoRide/public/index.php)
 $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-
-// Base path réel (ex: /EcoRide/public)
 $basePath = rtrim(str_replace('/index.php', '', $scriptName), '/');
-// BASE_URL (ex: /EcoRide/public)
+
+// BASE_URL ex: /EcoRide/public
 define('BASE_URL', $basePath === '' ? '' : $basePath);
 
 $path = $uriPath;
 
-// On retire le basePath du début de l’URL
+// Retirer le basePath du début
 if ($basePath !== '' && strpos($path, $basePath) === 0) {
     $path = substr($path, strlen($basePath));
 }
 
-// Cas racine
 if ($path === '' || $path === false) {
     $path = '/';
 }
 
 /*
 |--------------------------------------------------------------------------
-| Dispatch (appel du contrôleur)
+| Dispatch
 |--------------------------------------------------------------------------
 */
-$router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $path);
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+// echo "<pre>METHOD=$method\nPATH=$path\n</pre>";
+//exit;
+
+try {
+    $router->dispatch($method, $path);
+} catch (Throwable $e) {
+    http_response_code(404);
+    echo "404 - Page non trouvée";
+    // echo "<h1>Erreur (debug)</h1>";
+    // echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
+    // echo "<pre>" . htmlspecialchars($e->getFile() . ":" . $e->getLine()) . "</pre>";
+    // echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+}
