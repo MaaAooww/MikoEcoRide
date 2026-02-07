@@ -10,6 +10,7 @@ session_start();
 */
 require __DIR__ . '/../src/Core/Database.php';
 require __DIR__ . '/../src/Core/Router.php';
+require __DIR__ . '/../src/Core/Security.php';
 
 // Controllers
 require __DIR__ . '/../src/Controllers/HomeController.php';
@@ -17,6 +18,7 @@ require __DIR__ . '/../src/Controllers/AuthController.php';
 require __DIR__ . '/../src/Controllers/CovoiturageController.php';
 require __DIR__ . '/../src/Controllers/StaticController.php';
 require __DIR__ . '/../src/Controllers/AccountController.php';
+require __DIR__ . '/../src/Controllers/EmployeController.php';
 
 // Repositories
 require __DIR__ . '/../src/Repositories/UtilisateurRepository.php';
@@ -69,6 +71,11 @@ $router->post('/covoiturage/finish', [CovoiturageController::class, 'finishTrip'
 $router->get('/account/validate-trips', [AccountController::class, 'validateTrips']);
 $router->post('/account/validate-trips', [AccountController::class, 'submitTripValidation']);
 
+// US12 Employé : incidents / validation / refus
+$router->get('/employe/incidents', [EmployeController::class, 'incidents']);
+$router->post('/employe/incidents/validate', [EmployeController::class, 'validate']);
+$router->post('/employe/incidents/refuse', [EmployeController::class, 'refuse']);
+
 /*
 |--------------------------------------------------------------------------
 | Normalisation du chemin (indispensable sous /EcoRide/public)
@@ -105,10 +112,10 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 try {
     $router->dispatch($method, $path);
 } catch (Throwable $e) {
-    http_response_code(404);
-    echo "404 - Page non trouvée";
-    // echo "<h1>Erreur (debug)</h1>";
-    // echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
-    // echo "<pre>" . htmlspecialchars($e->getFile() . ":" . $e->getLine()) . "</pre>";
-    // echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    //http_response_code(404);
+    //echo "404 - Page non trouvée";
+    http_response_code(500);
+    echo "<h1>Erreur (debug)</h1>";
+    echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
+    echo "<pre>" . htmlspecialchars($e->getFile() . ":" . $e->getLine()) . "</pre>";
 }

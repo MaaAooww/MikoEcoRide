@@ -362,4 +362,119 @@ final class CovoiturageRepository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function findIncidentTrips(): array
+    {
+        $sql = "
+            SELECT
+                c.id_covoiturage,
+                c.date_depart,
+                c.lieu_depart,
+                c.date_arrivee,
+                c.lieu_arrivee,
+                c.statut,
+                c.prix_personne,
+
+                uCh.pseudo AS chauffeur_pseudo,
+                uCh.email  AS chauffeur_email,
+
+                uPa.pseudo AS passager_pseudo,
+                uPa.email  AS passager_email,
+
+                a.note,
+                a.commentaire
+
+            FROM covoiturage c
+            INNER JOIN avis a ON a.id_covoiturage = c.id_covoiturage
+
+            -- Chauffeur via véhicule du trajet
+            INNER JOIN utilise ut ON ut.id_covoiturage = c.id_covoiturage
+            INNER JOIN gere g     ON g.id_voiture = ut.id_voiture
+            INNER JOIN utilisateur uCh ON uCh.id_utilisateur = g.id_utilisateur
+
+            -- Passager = auteur de l'avis (depose)
+            INNER JOIN depose d ON d.id_avis = a.id_avis
+            INNER JOIN utilisateur uPa ON uPa.id_utilisateur = d.id_utilisateur
+
+            WHERE c.statut = 'INCIDENT'
+            AND a.statut = 'INCIDENT'
+            ORDER BY c.id_covoiturage DESC, a.id_avis DESC
+        ";
+
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function validateIncidentTrip(int $idCovoiturage): void
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            // 1) Lock covoiturage
+            $covoiturage = $this->getCovoiturageForUpdate($idCovoiturage);
+            if (!$covoiturage) {
+                throw new Exception("Covoiturage introuvable.");
+            }
+
+            // Idempotent : si déjà traité, on sort proprement
+            if (($covoiturage['statut'] ?? null) !== 'INCIDENT') {
+                $this->pdo->commit();
+                return;
+            }
+
+            // 2) Chauffeur via méthode existante (utilise -> gere)
+            $idChauffeur = $this->getDriverIdForTrip($idCovoiturage);
+            if (!$idChauffeur) {
+                throw new Exception("Chauffeur introuvable pour ce covoiturage.");
+            }
+
+            // 3) Montant à créditer (minimum cohérent)
+            $prix = (int)($covoiturage['prix_personne'] ?? 0);
+            $nbParticipants = $this->countParticipants($idCovoiturage);
+            $gain = $prix * $nbParticipants;
+
+            // 4) Statut -> VALIDE
+            $this->setTripStatus($idCovoiturage, 'VALIDE');
+
+            // 5) Créditer chauffeur
+            $userRepo = new UtilisateurRepository($this->pdo);
+            $userRepo->addCreditTransaction(
+                $idChauffeur,
+                $idCovoiturage,
+                $gain,
+                "Validation trajet par employé"
+            );
+
+            $this->pdo->commit();
+
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    public function refuseIncidentTrip(int $idCovoiturage): void
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            $covoiturage = $this->getCovoiturageForUpdate($idCovoiturage);
+            if (!$covoiturage) {
+                throw new Exception("Covoiturage introuvable.");
+            }
+
+            if (($covoiturage['statut'] ?? null) !== 'INCIDENT') {
+                $this->pdo->commit();
+                return;
+            }
+
+            $this->setTripStatus($idCovoiturage, 'ANNULE');
+
+            $this->pdo->commit();
+
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
 }
