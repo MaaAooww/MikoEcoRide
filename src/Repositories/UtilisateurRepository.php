@@ -228,4 +228,50 @@ final class UtilisateurRepository
 
         return $idAvis;
     }
+
+        public function isSuspended(int $idUtilisateur): bool
+    {
+        $sql = "
+            SELECT 1
+            FROM configuration c
+            JOIN parametre p ON p.id_configuration = c.id_configuration
+            WHERE c.id_utilisateur = :u
+              AND p.propriete = 'SUSPENDED'
+              AND p.valeur = '1'
+            LIMIT 1
+        ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':u' => $idUtilisateur]);
+
+        return (bool)$stmt->fetchColumn();
+    }
+
+    public function setSuspended(int $idUtilisateur, bool $suspended): void
+    {
+        // 1) trouver ou créer configuration
+        $stmt = $this->pdo->prepare("SELECT id_configuration FROM configuration WHERE id_utilisateur = :u LIMIT 1");
+        $stmt->execute([':u' => $idUtilisateur]);
+        $idConfig = (int)$stmt->fetchColumn();
+
+        if ($idConfig <= 0) {
+            $stmt = $this->pdo->prepare("INSERT INTO configuration (id_utilisateur) VALUES (:u)");
+            $stmt->execute([':u' => $idUtilisateur]);
+            $idConfig = (int)$this->pdo->lastInsertId();
+        }
+
+        if ($suspended) {
+            // upsert simple : delete puis insert
+            $del = $this->pdo->prepare("DELETE FROM parametre WHERE id_configuration = :c AND propriete = 'SUSPENDED'");
+            $del->execute([':c' => $idConfig]);
+
+            $ins = $this->pdo->prepare("
+                INSERT INTO parametre (id_configuration, propriete, valeur)
+                VALUES (:c, 'SUSPENDED', '1')
+            ");
+            $ins->execute([':c' => $idConfig]);
+        } else {
+            $del = $this->pdo->prepare("DELETE FROM parametre WHERE id_configuration = :c AND propriete = 'SUSPENDED'");
+            $del->execute([':c' => $idConfig]);
+        }
+    }
 }

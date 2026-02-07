@@ -19,10 +19,12 @@ require __DIR__ . '/../src/Controllers/CovoiturageController.php';
 require __DIR__ . '/../src/Controllers/StaticController.php';
 require __DIR__ . '/../src/Controllers/AccountController.php';
 require __DIR__ . '/../src/Controllers/EmployeController.php';
+require __DIR__ . '/../src/Controllers/AdminController.php';
 
 // Repositories
 require __DIR__ . '/../src/Repositories/UtilisateurRepository.php';
 require __DIR__ . '/../src/Repositories/CovoiturageRepository.php';
+require __DIR__ . '/../src/Repositories/AdminRepository.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +78,15 @@ $router->get('/employe/incidents', [EmployeController::class, 'incidents']);
 $router->post('/employe/incidents/validate', [EmployeController::class, 'validate']);
 $router->post('/employe/incidents/refuse', [EmployeController::class, 'refuse']);
 
+// US13 Admin
+$router->get('/admin', [AdminController::class, 'dashboard']);
+
+$router->get('/admin/employees', [AdminController::class, 'employees']);
+$router->post('/admin/employees/create', [AdminController::class, 'createEmployee']);
+
+$router->post('/admin/users/suspend', [AdminController::class, 'suspendUser']);
+$router->post('/admin/users/unsuspend', [AdminController::class, 'unsuspendUser']);
+
 /*
 |--------------------------------------------------------------------------
 | Normalisation du chemin (indispensable sous /EcoRide/public)
@@ -97,6 +108,16 @@ if ($basePath !== '' && strpos($path, $basePath) === 0) {
 
 if ($path === '' || $path === false) {
     $path = '/';
+}
+
+// Blocage global si l'utilisateur en session est suspendu
+if (isset($_SESSION['user'])) {
+    $userRepo = new UtilisateurRepository();
+    $id = (int)$_SESSION['user']['id_utilisateur'];
+    if ($userRepo->isSuspended($id)) {
+        unset($_SESSION['user']);
+        $_SESSION['flash_error'] = "Votre compte est suspendu.";
+    }
 }
 
 /*

@@ -13,7 +13,6 @@ final class AuthController
 
     public function register(): void
     {
-        // Récup POST
         $nom            = trim((string)($_POST['nom'] ?? ''));
         $prenom         = trim((string)($_POST['prenom'] ?? ''));
         $pseudo         = trim((string)($_POST['pseudo'] ?? ''));
@@ -25,7 +24,6 @@ final class AuthController
         $dateNaissance  = trim((string)($_POST['date_naissance'] ?? ''));
         $photo          = trim((string)($_POST['photo'] ?? ''));
 
-        // Validations minimales (côté serveur)
         if ($nom === '' || $prenom === '' || $pseudo === '' || $email === '' || $password === '') {
             $_SESSION['flash_error'] = "Tous les champs obligatoires doivent être renseignés.";
             header("Location: " . BASE_URL . "/register");
@@ -50,30 +48,15 @@ final class AuthController
             exit;
         }
 
-        $repo = new UtilisateurRepository();
+        // ⚠️ IMPORTANT : utilise la même méthode que ton projet.
+        // Si ton Database.php expose Database::getConnection(), utilise ça :
+        $pdo = Database::getConnection(); // <-- ou Database::pdo() si c'est bien le nom chez toi
 
-        // Empêcher doublons (ta table n’a pas de UNIQUE => on le gère côté code)
-        if ($repo->findByEmail($email)) {
-            $_SESSION['flash_error'] = "Cet email est déjà utilisé.";
-            header("Location: " . BASE_URL . "/register");
-            exit;
-        }
-        if ($repo->findByPseudo($pseudo)) {
-            $_SESSION['flash_error'] = "Ce pseudo est déjà utilisé.";
-            header("Location: " . BASE_URL . "/register");
-            exit;
-        }
-
-        // Hash bcrypt
-        $hash = password_hash($password, PASSWORD_BCRYPT);
-
-                $pdo = Database::pdo();
         $pdo->beginTransaction();
 
         try {
             $repo = new UtilisateurRepository($pdo);
 
-            // Empêcher doublons (ta table n’a pas de UNIQUE => on le gère côté code)
             if ($repo->findByEmail($email)) {
                 throw new Exception("Cet email est déjà utilisé.");
             }
@@ -81,8 +64,7 @@ final class AuthController
                 throw new Exception("Ce pseudo est déjà utilisé.");
             }
 
-            // Hash bcrypt
-            $hash = password_hash($password, PASSWORD_BCRYPT);
+            $hash = password_hash($password, PASSWORD_DEFAULT);
 
             $newId = $repo->create([
                 'nom'            => $nom,
@@ -96,10 +78,7 @@ final class AuthController
                 'pseudo'         => $pseudo,
             ]);
 
-            // Rôle de base
             $repo->addRole((int)$newId, 'UTILISATEUR');
-
-            // 20 crédits offerts à la création
             $repo->addCreditTransaction((int)$newId, null, 20, 'Crédits offerts à la création du compte');
 
             $pdo->commit();
@@ -111,7 +90,6 @@ final class AuthController
             exit;
         }
 
-        // Connexion automatique après inscription
         $_SESSION['user'] = [
             'id_utilisateur' => (int)$newId,
             'pseudo'         => $pseudo,
@@ -154,6 +132,13 @@ final class AuthController
         if (!password_verify($password, (string)$user['password'])) {
             $_SESSION['flash_error'] = "Identifiants invalides.";
             header("Location: " . BASE_URL . "/login");
+            exit;
+        }
+
+        // Blocage si compte suspendu
+        if ($repo->isSuspended((int)$user['id_utilisateur'])) {
+            $_SESSION['flash_error'] = "Votre compte est suspendu.";
+            header('Location: ' . BASE_URL . '/login');
             exit;
         }
 
