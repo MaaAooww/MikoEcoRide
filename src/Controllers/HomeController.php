@@ -4,6 +4,7 @@ final class HomeController
     public function index(): void
     {
         $title = "EcoRide";
-        require __DIR__ . '/../../views/home.php';
+        $viewFile = __DIR__ . '/../../views/home.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 }

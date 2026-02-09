@@ -5,11 +5,15 @@ final class StaticController
 {
     public function contact(): void
     {
-        require __DIR__ . '/../../views/static/contact.php';
+        $title = "Contact";
+        $viewFile = __DIR__ . '/../../views/static/contact.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function mentionsLegales(): void
     {
-        require __DIR__ . '/../../views/static/mentions_legales.php';
+        $title = "Mentions légales";
+        $viewFile = __DIR__ . '/../../views/static/mentions_legales.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 }

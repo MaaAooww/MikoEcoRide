@@ -17,7 +17,9 @@ final class AccountController
         $roles = $repo->getRoleLibelles($idUtilisateur);
         $solde = $repo->getCreditBalance($idUtilisateur);
 
-        require __DIR__ . '/../../views/account/index.php';
+        $title = "Mon compte";
+        $viewFile = __DIR__ . '/../../views/account/index.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function updateDriverRole(): void

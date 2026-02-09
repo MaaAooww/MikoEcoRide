@@ -16,7 +16,9 @@ final class CovoiturageController
         $repo = new CovoiturageRepository();
         $results = $repo->search($depart, $arrivee, $date, $prixMax, $ecoOnly);
 
-        require __DIR__ . '/../../views/covoiturage/list.php';
+        $title = "Covoiturages";
+        $viewFile = __DIR__ . '/../../views/covoiturage/list.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function detail(): void
@@ -44,7 +46,9 @@ final class CovoiturageController
             $isDriverOfTrip = ($idDriver !== null) && ((int)$_SESSION['user']['id_utilisateur'] === (int)$idDriver);
         }
 
-        require __DIR__ . '/../../views/covoiturage/detail.php';
+        $title = "Détail covoiturage";
+        $viewFile = __DIR__ . '/../../views/covoiturage/detail.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
 
@@ -78,7 +82,9 @@ final class CovoiturageController
         $prixCredits = (int)$covoit['prix_personne'];
         $error = null;
 
-        require __DIR__ . '/../../views/covoiturage/confirm_participation.php';
+        $title = "Confirmation participation";
+        $viewFile = __DIR__ . '/../../views/covoiturage/confirm_participation.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function participer(): void
@@ -161,7 +167,9 @@ final class CovoiturageController
 
             $prixCredits = $covoit ? (int)$covoit['prix_personne'] : 0;
 
-            require __DIR__ . '/../../views/covoiturage/confirm_participation.php';
+            $title = "Confirmation participation";
+            $viewFile = __DIR__ . '/../../views/covoiturage/confirm_participation.php';
+            require __DIR__ . '/../../views/layout.php';
         }
     }
 

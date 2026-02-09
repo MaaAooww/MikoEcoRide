@@ -1,25 +1,34 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <title>Connexion - EcoRide</title>
-</head>
-<body>
+<?php // views/auth/login.php (contenu uniquement) ?>
+
+<div class="card">
   <h1>Connexion</h1>
 
-  <?php if (!empty($error)): ?>
-    <p style="color:red;"><strong><?= htmlspecialchars($error) ?></strong></p>
+  <?php if (!empty($_SESSION['flash_error'])): ?>
+    <div class="alert alert-danger">
+      <?= htmlspecialchars((string)$_SESSION['flash_error']) ?>
+    </div>
+    <?php unset($_SESSION['flash_error']); ?>
+    <br>
   <?php endif; ?>
 
-  <form method="post" action="login">
-    <label>Email <input type="email" name="email" required></label><br>
-    <label>Mot de passe <input type="password" name="password" required></label><br>
+  <form method="post" action="<?= BASE_URL ?>/login" class="form-grid">
+    <label>
+      Email
+      <input type="email" name="email" required autocomplete="email">
+    </label>
+
+    <label>
+      Mot de passe
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+
     <button type="submit">Se connecter</button>
   </form>
 
-  <p>
-    <a href="./">← Accueil</a> |
-    <a href="register">Inscription</a>
+  <br>
+
+  <p class="muted">
+    Pas encore de compte ?
+    <a href="<?= BASE_URL ?>/register">Créer un compte</a>
   </p>
-</body>
-</html>
+</div>

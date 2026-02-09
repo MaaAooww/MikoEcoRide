@@ -8,7 +8,9 @@ final class AuthController
         $error = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_error']);
 
-        require __DIR__ . '/../../views/auth/register.php';
+        $title = "Inscription";
+        $viewFile = __DIR__ . '/../../views/auth/register.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function register(): void
@@ -105,7 +107,9 @@ final class AuthController
         $error = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_error']);
 
-        require __DIR__ . '/../../views/auth/login.php';
+        $title = "Connexion";
+        $viewFile = __DIR__ . '/../../views/auth/login.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function login(): void

@@ -1,26 +1,35 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <title>Détail - EcoRide</title>
-</head>
-<body>
+<?php // views/covoiturage/detail.php (contenu uniquement) ?>
+
+<?php $statut = (string)($covoit['statut'] ?? ''); ?>
+
+<div class="card">
   <h1>Détail du covoiturage #<?= (int)$covoit['id_covoiturage'] ?></h1>
 
-  <p><a href="<?= BASE_URL ?>/covoiturages?depart=<?= urlencode((string)$covoit['lieu_depart']) ?>&arrivee=<?= urlencode((string)$covoit['lieu_arrivee']) ?>&date=<?= urlencode((string)$covoit['date_depart']) ?>">← Retour liste</a></p>
+  <p>
+    <a href="<?= BASE_URL ?>/covoiturages">← Retour liste</a>
+  </p>
+
+  <div class="badge">Statut : <strong><?= htmlspecialchars($statut) ?></strong></div>
+
+  <br>
 
   <ul>
-    <li><strong>Départ :</strong> <?= htmlspecialchars((string)$covoit['lieu_depart']) ?> (<?= htmlspecialchars((string)$covoit['date_depart']) ?> <?= htmlspecialchars((string)$covoit['heure_depart']) ?>)</li>
-    <li><strong>Arrivée :</strong> <?= htmlspecialchars((string)$covoit['lieu_arrivee']) ?> (<?= htmlspecialchars((string)$covoit['date_arrivee']) ?> <?= htmlspecialchars((string)$covoit['heure_arrivee']) ?>)</li>
-    <li><strong>Statut :</strong> <?= htmlspecialchars((string)$covoit['statut']) ?></li>
+    <li><strong>Départ :</strong> <?= htmlspecialchars((string)$covoit['lieu_depart']) ?>
+      (<?= htmlspecialchars((string)$covoit['date_depart']) ?> <?= htmlspecialchars((string)$covoit['heure_depart']) ?>)
+    </li>
+
+    <li><strong>Arrivée :</strong> <?= htmlspecialchars((string)$covoit['lieu_arrivee']) ?>
+      (<?= htmlspecialchars((string)$covoit['date_arrivee']) ?> <?= htmlspecialchars((string)$covoit['heure_arrivee']) ?>)
+    </li>
+
     <li><strong>Places :</strong> <?= htmlspecialchars((string)$covoit['nb_place']) ?></li>
     <li><strong>Prix :</strong> <?= htmlspecialchars((string)$covoit['prix_personne']) ?> crédits</li>
   </ul>
+</div>
 
-  <?php
-    $statut = (string)($covoit['statut'] ?? '');
-  ?>
+<br>
 
+<div class="card">
   <?php if (!empty($isDriverOfTrip)): ?>
 
     <h2>Actions chauffeur</h2>
@@ -30,49 +39,59 @@
         <input type="hidden" name="id_covoiturage" value="<?= (int)$covoit['id_covoiturage'] ?>">
         <button type="submit">Démarrer le covoiturage</button>
       </form>
+
     <?php elseif ($statut === 'EN_COURS'): ?>
       <form method="post" action="<?= BASE_URL ?>/covoiturage/finish">
         <input type="hidden" name="id_covoiturage" value="<?= (int)$covoit['id_covoiturage'] ?>">
         <button type="submit">Terminer le covoiturage</button>
       </form>
+
     <?php elseif ($statut === 'TERMINE'): ?>
       <p><strong>Trajet terminé.</strong> En attente de validation des passagers.</p>
+
     <?php elseif ($statut === 'VALIDE'): ?>
       <p><strong>Trajet validé.</strong> Crédits chauffeur mis à jour.</p>
+
     <?php elseif ($statut === 'INCIDENT'): ?>
-      <p style="color:red;"><strong>Incident signalé.</strong> Un employé doit traiter la situation (US12).</p>
+      <div class="alert alert-danger">
+        <strong>Incident signalé.</strong> Un employé doit traiter la situation (US12).
+      </div>
     <?php endif; ?>
 
   <?php else: ?>
+
+    <h2>Participation</h2>
 
     <?php if (isset($_SESSION['user'])): ?>
 
       <?php if ($statut === 'PLANIFIE'): ?>
         <p>
-          <a
-            href="<?= BASE_URL ?>/covoiturage/participer?id=<?= (int)$covoit['id_covoiturage'] ?>"
-            class="btn btn-success"
-          >
+          <a class="btn" href="<?= BASE_URL ?>/covoiturage/participer?id=<?= (int)$covoit['id_covoiturage'] ?>">
             Participer (<?= (int)$covoit['prix_personne'] ?> crédits)
           </a>
         </p>
       <?php else: ?>
-        <p><em>Ce covoiturage n’est pas disponible à la participation (statut : <?= htmlspecialchars($statut) ?>).</em></p>
+        <p class="muted">
+          Ce covoiturage n’est pas disponible à la participation (statut : <?= htmlspecialchars($statut) ?>).
+        </p>
       <?php endif; ?>
 
     <?php else: ?>
 
       <p>
-        <a href="<?= BASE_URL ?>/login" class="btn btn-primary">
-          Se connecter pour participer
-        </a>
+        <a class="btn" href="<?= BASE_URL ?>/login">Se connecter pour participer</a>
       </p>
 
     <?php endif; ?>
 
   <?php endif; ?>
+</div>
 
+<br>
+
+<div class="card">
   <h2>Véhicule</h2>
+
   <?php if (!empty($covoit['modele'])): ?>
     <ul>
       <li><strong>Modèle :</strong> <?= htmlspecialchars((string)$covoit['modele']) ?></li>
@@ -81,7 +100,6 @@
       <li><strong>Immatriculation :</strong> <?= htmlspecialchars((string)$covoit['immatriculation']) ?></li>
     </ul>
   <?php else: ?>
-    <p>Aucun véhicule associé (table `utilise` vide ou non renseignée pour ce trajet).</p>
+    <p class="muted">Aucun véhicule associé à ce trajet.</p>
   <?php endif; ?>
-</body>
-</html>
+</div>

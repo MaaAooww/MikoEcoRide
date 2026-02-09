@@ -1,0 +1,191 @@
+/* EcoRide - CSS minimal ECF (sans framework) */
+
+:root{
+  --bg: #f6f7f8;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --brand: #1b7f5a;
+  --brand-2: #145f44;
+  --border: #e5e7eb;
+}
+
+*{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+a{ color: var(--brand); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+
+.container{
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 16px 0;
+}
+
+.header{
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.nav-left, .nav-right{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.badge{
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e8f5ef;
+  color: var(--brand-2);
+  font-size: 0.9rem;
+}
+
+.main{
+  padding: 18px 0;
+}
+
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+h1,h2,h3{ margin: 0 0 12px; }
+p{ margin: 0 0 12px; color: var(--text); }
+
+.muted{ color: var(--muted); }
+
+.form-grid{
+  display: grid;
+  gap: 10px;
+}
+
+label{
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+input, select, textarea{
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+button{
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:hover{ background: var(--brand-2); }
+
+.btn-link{
+  background: transparent;
+  color: var(--brand);
+  padding: 0;
+  font-weight: 700;
+}
+
+.table{
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table th, .table td{
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th{
+  background: #f3f4f6;
+}
+
+.footer{
+  margin-top: 20px;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+
+.hero-img{
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
+
+/* Responsive minimal */
+@media (max-width: 640px){
+  .nav{ gap: 8px; }
+  .nav-left, .nav-right{ gap: 8px; }
+  .container{ width: calc(100% - 24px); }
+}
+
+/* Checkbox alignée */
+.checkbox{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.checkbox input[type="checkbox"]{
+  width: auto;
+}
+
+/* Liens affichés comme boutons */
+.btn{
+  display: inline-block;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+.btn:hover{ background: var(--brand-2); text-decoration: none; }
+
+/* Alertes simples */
+.alert{
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+.alert-danger{
+  border-color: #f3b4b4;
+  background: #fff1f1;
+}
