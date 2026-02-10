@@ -105,57 +105,59 @@ Le projet EcoRide repose sur une architecture MVC stricte, développée sans fra
 
 ### Arborescence complète du projet
 
+```
 EcoRide
 ├── public
-│ ├── index.php (Front Controller)
-│ ├── .htaccess
-│ └── assets
-│ └── css
-│ └── style.css
+│   ├── index.php (Front Controller)
+│   ├── .htaccess
+│   └── assets
+│       └── css
+│           └── style.css
 ├── src
-│ ├── Core
-│ │ ├── Database.php (Connexion PDO)
-│ │ ├── Router.php (Routeur maison GET / POST)
-│ │ └── Security.php (Sécurité, échappement, helpers)
-│ ├── Controllers
-│ │ ├── AccountController.php
-│ │ ├── AdminController.php
-│ │ ├── AuthController.php
-│ │ ├── CovoiturageController.php
-│ │ ├── EmployeController.php
-│ │ ├── HomeController.php
-│ │ └── StaticController.php
-│ ├── Repositories
-│ │ ├── UtilisateurRepository.php
-│ │ ├── CovoiturageRepository.php
-│ │ └── AdminRepository.php
+│   ├── Core
+│   │   ├── Database.php (Connexion PDO)
+│   │   ├── Router.php (Routeur maison GET / POST)
+│   │   └── Security.php (Sécurité, échappement, helpers)
+│   ├── Controllers
+│   │   ├── AccountController.php
+│   │   ├── AdminController.php
+│   │   ├── AuthController.php
+│   │   ├── CovoiturageController.php
+│   │   ├── EmployeController.php
+│   │   ├── HomeController.php
+│   │   └── StaticController.php
+│   ├── Repositories
+│   │   ├── UtilisateurRepository.php
+│   │   ├── CovoiturageRepository.php
+│   │   └── AdminRepository.php
 ├── views
-│ ├── layout.php (Layout global)
-│ ├── home.php
-│ ├── account
-│ │ ├── index.php
-│ │ ├── vehicles.php
-│ │ ├── new_trip.php
-│ │ ├── history.php
-│ │ └── validate_trips.php
-│ ├── admin
-│ │ ├── dashboard.php
-│ │ └── employees.php
-│ ├── auth
-│ │ ├── login.php
-│ │ └── register.php
-│ ├── covoiturage
-│ │ ├── list.php
-│ │ ├── detail.php
-│ │ └── confirm_participation.php
-│ ├── employe
-│ │ └── incidents.php
-│ └── static
-│ ├── contact.php
-│ └── mentions_legales.php
+│   ├── layout.php (Layout global)
+│   ├── home.php
+│   ├── account
+│   │   ├── index.php
+│   │   ├── vehicles.php
+│   │   ├── new_trip.php
+│   │   ├── history.php
+│   │   └── validate_trips.php
+│   ├── admin
+│   │   ├── dashboard.php
+│   │   └── employees.php
+│   ├── auth
+│   │   ├── login.php
+│   │   └── register.php
+│   ├── covoiturage
+│   │   ├── list.php
+│   │   ├── detail.php
+│   │   └── confirm_participation.php
+│   ├── employe
+│   │   └── incidents.php
+│   └── static
+│       ├── contact.php
+│       └── mentions_legales.php
 ├── config
-│ └── config.php
+│   └── config.php
 └── README.md
+```
 
 ### Principes d’architecture
 
@@ -202,3 +204,7 @@ EcoRide
    http://localhost/EcoRide/public
 
 ---
+
+```
+
+```
