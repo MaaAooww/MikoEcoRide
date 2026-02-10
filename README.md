@@ -106,6 +106,56 @@ Le projet EcoRide repose sur une architecture **MVC stricte**, développée sans
 ### Arborescence complète du projet
 
 EcoRide
++-- public
+¦-- +-- index.php
+¦-- +- .htaccess
+
++- src
+¦ +- Core
+¦ ¦ +- Database.php
+¦ ¦ +- Router.php
+¦ ¦ +- Security.php
+¦ +- Controllers
+¦ ¦ +- AccountController.php
+¦ ¦ +- AdminController.php
+¦ ¦ +- AuthController.php
+¦ ¦ +- CovoiturageController.php
+¦ ¦ +- EmployeController.php
+¦ ¦ +- HomeController.php
+¦ ¦ +- StaticController.php
+¦ +- Repositories
+¦ +- UtilisateurRepository.php
+¦ +- CovoiturageRepository.php
+¦ +- AdminRepository.php
++- views
+¦ +- layout.php
+¦ +- home.php
+¦ +- account
+¦ ¦ +- history.php
+¦ ¦ +- index.php
+¦ ¦ +- new_trip.php
+¦ ¦ +- vehicles.php
+¦ ¦ +- validate_trips.php
+¦ +- admin
+¦ ¦ +- dashboard.php
+¦ ¦ +- employees.php
+¦ +- auth
+¦ ¦ +- login.php
+¦ ¦ +- register.php
+¦ +- covoiturage
+¦ +- confirm_participation.php
+¦ +- list.php
+¦ +- detail.php
+¦ +- employe
+¦ ¦ +- incidents.php
+¦ +- static
+¦ +- contact.php
+¦ +- mentions_legales.php
++- config
+¦ +- config.php
++- README.md
+
+EcoRide
 +- public
 ¦ +- index.php
 ¦ +- .htaccess
