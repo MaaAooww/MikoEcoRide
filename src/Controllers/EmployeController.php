@@ -23,7 +23,9 @@ final class EmployeController
         $repo = new CovoiturageRepository();
         $incidents = $repo->findIncidentTrips(); // => tableau de lignes (trajet + chauffeur + passager + avis)
 
-        require __DIR__ . '/../../views/employe/incidents.php';
+        $title = "Espace Employé – Incidents";
+        $viewFile = __DIR__ . '/../../views/employe/incidents.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function validate(): void

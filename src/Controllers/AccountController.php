@@ -90,7 +90,9 @@ final class AccountController
         $error = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_error']);
 
-        require __DIR__ . '/../../views/account/vehicles.php';
+        $title = "Mes véhicules";
+        $viewFile = __DIR__ . '/../../views/account/vehicles.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function addVehicle(): void
@@ -171,7 +173,9 @@ final class AccountController
         $error = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_error']);
 
-        require __DIR__ . '/../../views/account/new_trip.php';
+        $title = "Créer un covoiturage";
+        $viewFile = __DIR__ . '/../../views/account/new_trip.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function createTrip(): void
@@ -273,7 +277,9 @@ final class AccountController
         $error = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 
-        require __DIR__ . '/../../views/account/history.php';
+        $title = "Historique";
+        $viewFile = __DIR__ . '/../../views/account/history.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function cancelParticipation(): void
@@ -424,7 +430,9 @@ final class AccountController
         $error = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 
-        require __DIR__ . '/../../views/account/validate_trips.php';
+        $title = "Valider mes trajets";
+        $viewFile = __DIR__ . '/../../views/account/validate_trips.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function submitTripValidation(): void

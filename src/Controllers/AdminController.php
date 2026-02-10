@@ -33,7 +33,9 @@ final class AdminController
         $creditsPlateformeParJour = $repo->getCreditsPlateformeParJour(); // [date => credits]
         $creditsPlateformeTotal = $repo->getCreditsPlateformeTotal(); // int
 
-        require __DIR__ . '/../../views/admin/dashboard.php';
+        $title = "Admin";
+        $viewFile = __DIR__ . '/../../views/admin/dashboard.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function employees(): void
@@ -43,7 +45,9 @@ final class AdminController
         $repo = new AdminRepository();
         $employes = $repo->getEmployes(); // liste utilisateurs ayant role EMPLOYE
 
-        require __DIR__ . '/../../views/admin/employees.php';
+        $title = "Admin - Employés";
+        $viewFile = __DIR__ . '/../../views/admin/employees.php';
+        require __DIR__ . '/../../views/layout.php';
     }
 
     public function createEmployee(): void

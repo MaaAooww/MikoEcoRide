@@ -189,3 +189,4 @@ button:hover{ background: var(--brand-2); }
   border-color: #f3b4b4;
   background: #fff1f1;
 }
+.table td form { margin-left: 8px; }

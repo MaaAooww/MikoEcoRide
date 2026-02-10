@@ -44,7 +44,7 @@
 <div class="card">
   <h2>Accès rapides</h2>
 
-  <?php if (!empty($isDriver)): ?>
+  <?php if ($isDriver): ?>
     <p><a class="btn" href="<?= BASE_URL ?>/account/trips/new">Créer un covoiturage</a></p>
     <p><a class="btn" href="<?= BASE_URL ?>/account/vehicles">Gérer mes véhicules</a></p>
   <?php endif; ?>

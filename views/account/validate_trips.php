@@ -1,71 +1,85 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <title>Valider mes trajets - EcoRide</title>
-</head>
-<body>
-
-<nav>
-  <a href="<?= BASE_URL ?>/">Accueil</a> |
-  <a href="<?= BASE_URL ?>/covoiturages">Covoiturages</a> |
-  <a href="<?= BASE_URL ?>/account">Mon compte</a> |
-  <a href="<?= BASE_URL ?>/account/history">Historique</a> |
-  <a href="<?= BASE_URL ?>/contact">Contact</a> |
-  <form method="post" action="<?= BASE_URL ?>/logout" style="display:inline;">
-    <button type="submit">Déconnexion</button>
-  </form>
-</nav>
-
-<hr>
+<?php
+// views/account/validate_trips.php
+?>
 
 <h1>Valider mes trajets</h1>
 
 <?php if (!empty($success)): ?>
-  <p style="color:green;"><strong><?= htmlspecialchars((string)$success) ?></strong></p>
+  <div class="alert alert-success">
+    <strong><?= htmlspecialchars((string)$success) ?></strong>
+  </div>
 <?php endif; ?>
+
 <?php if (!empty($error)): ?>
-  <p style="color:red;"><strong><?= htmlspecialchars((string)$error) ?></strong></p>
+  <div class="alert alert-error">
+    <strong><?= htmlspecialchars((string)$error) ?></strong>
+  </div>
 <?php endif; ?>
 
 <?php if (empty($tripsToValidate)): ?>
-  <p>Aucun trajet à valider.</p>
+  <div class="card">
+    <p>Aucun trajet à valider.</p>
+    <div class="form-actions">
+      <a class="btn btn-secondary" href="<?= BASE_URL ?>/account">Retour</a>
+    </div>
+  </div>
+
 <?php else: ?>
-  <ul>
+
+  <div class="alert">
+    <strong>Rappel :</strong> Si tu signales un <strong>incident</strong>, le <strong>commentaire est obligatoire</strong>.
+    Un incident sera traité par un employé (US12).
+  </div>
+
   <?php foreach ($tripsToValidate as $t): ?>
-    <li>
-      <strong>#<?= (int)$t['id_covoiturage'] ?></strong>
-      — <?= htmlspecialchars((string)$t['lieu_depart']) ?> → <?= htmlspecialchars((string)$t['lieu_arrivee']) ?>
-      (<?= htmlspecialchars((string)$t['date_depart']) ?> <?= htmlspecialchars((string)$t['heure_depart']) ?>)
-      — <a href="<?= BASE_URL ?>/covoiturage?id=<?= (int)$t['id_covoiturage'] ?>">Détail</a>
+    <div class="card">
+      <h2>
+        #<?= (int)$t['id_covoiturage'] ?>
+        — <?= htmlspecialchars((string)$t['lieu_depart']) ?> → <?= htmlspecialchars((string)$t['lieu_arrivee']) ?>
+      </h2>
 
-      <div style="margin-top:8px; padding:8px; border:1px solid #ccc;">
-        <form method="post" action="<?= BASE_URL ?>/account/validate-trips">
-          <input type="hidden" name="id_covoiturage" value="<?= (int)$t['id_covoiturage'] ?>">
+      <p>
+        <strong>Départ :</strong>
+        <?= htmlspecialchars((string)$t['date_depart']) ?> <?= htmlspecialchars((string)$t['heure_depart']) ?>
+        —
+        <a href="<?= BASE_URL ?>/covoiturage?id=<?= (int)$t['id_covoiturage'] ?>">Voir le détail</a>
+      </p>
 
-          <label>Note (1 à 5) :
-            <input type="number" name="note" min="1" max="5">
-          </label>
-          <br><br>
+      <form method="post" action="<?= BASE_URL ?>/account/validate-trips" class="form" style="margin-top:12px;">
+        <input type="hidden" name="id_covoiturage" value="<?= (int)$t['id_covoiturage'] ?>">
 
-          <label>Commentaire :
-            <br>
-            <textarea name="commentaire" rows="3" cols="50"></textarea>
-          </label>
-          <br><br>
+        <div class="form-row">
+          <label for="note_<?= (int)$t['id_covoiturage'] ?>">Note (1 à 5)</label>
+          <input
+            id="note_<?= (int)$t['id_covoiturage'] ?>"
+            type="number"
+            name="note"
+            min="1"
+            max="5"
+            placeholder="Optionnel"
+          >
+        </div>
 
-          <button type="submit" name="action" value="VALIDE">Valider (trajet OK)</button>
-          <button type="submit" name="action" value="INCIDENT">Signaler un incident</button>
-        </form>
+        <div class="form-row">
+          <label for="commentaire_<?= (int)$t['id_covoiturage'] ?>">Commentaire</label>
+          <textarea
+            id="commentaire_<?= (int)$t['id_covoiturage'] ?>"
+            name="commentaire"
+            rows="3"
+            placeholder="Obligatoire si incident"
+          ></textarea>
+        </div>
 
-        <p style="font-size:12px;">
-          Incident = commentaire obligatoire. Un incident déclenche un traitement par un employé (US12).
-        </p>
-      </div>
-    </li>
+        <div class="form-actions">
+          <button class="btn" type="submit" name="action" value="VALIDE">Valider (trajet OK)</button>
+          <button class="btn btn-secondary" type="submit" name="action" value="INCIDENT">Signaler un incident</button>
+        </div>
+      </form>
+    </div>
   <?php endforeach; ?>
-  </ul>
-<?php endif; ?>
 
-</body>
-</html>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="<?= BASE_URL ?>/account">Retour</a>
+  </div>
+
+<?php endif; ?>

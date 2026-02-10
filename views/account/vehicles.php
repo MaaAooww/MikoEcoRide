@@ -1,85 +1,96 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <title>Mes véhicules - EcoRide</title>
-</head>
-<body>
+<?php
+// views/account/vehicles.php
+?>
 
-  <nav>
-    <a href="<?= BASE_URL ?>/">Accueil</a> |
-    <a href="<?= BASE_URL ?>/covoiturages">Covoiturages</a> |
-    <a href="<?= BASE_URL ?>/account">Mon compte</a> |
-    <a href="<?= BASE_URL ?>/account/vehicles">Mes véhicules</a> |
-    <a href="<?= BASE_URL ?>/contact">Contact</a> |
-    <form method="post" action="<?= BASE_URL ?>/logout" style="display:inline;">
-      <button type="submit">Déconnexion</button>
-    </form>
-  </nav>
+<h1>Mes véhicules</h1>
 
-  <hr>
+<?php if (!empty($error)): ?>
+  <div class="alert alert-error">
+    <strong><?= htmlspecialchars((string)$error) ?></strong>
+  </div>
+<?php endif; ?>
 
-  <h1>Mes véhicules</h1>
-
-  <?php if ($error): ?>
-    <p style="color:red;"><strong><?= htmlspecialchars((string)$error) ?></strong></p>
-  <?php endif; ?>
-
+<div class="card">
   <h2>Liste</h2>
 
   <?php if (empty($vehicles)): ?>
     <p>Aucun véhicule enregistré.</p>
   <?php else: ?>
-    <table border="1" cellpadding="6" cellspacing="0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Marque</th>
-          <th>Modèle</th>
-          <th>Immatriculation</th>
-          <th>Energie</th>
-          <th>Couleur</th>
-          <th>Date 1ère immat.</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($vehicles as $v): ?>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
           <tr>
-            <td><?= (int)$v['id_voiture'] ?></td>
-            <td><?= htmlspecialchars((string)($v['marque'] ?? '')) ?></td>
-            <td><?= htmlspecialchars((string)$v['modele']) ?></td>
-            <td><?= htmlspecialchars((string)$v['immatriculation']) ?></td>
-            <td><?= htmlspecialchars((string)$v['energie']) ?></td>
-            <td><?= htmlspecialchars((string)$v['couleur']) ?></td>
-            <td><?= htmlspecialchars((string)$v['date_premiere_immatriculation']) ?></td>
+            <th>ID</th>
+            <th>Marque</th>
+            <th>Modèle</th>
+            <th>Immatriculation</th>
+            <th>Énergie</th>
+            <th>Couleur</th>
+            <th>Date 1ère immat.</th>
           </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <?php foreach ($vehicles as $v): ?>
+            <tr>
+              <td><?= (int)$v['id_voiture'] ?></td>
+              <td><?= htmlspecialchars((string)($v['marque'] ?? '')) ?></td>
+              <td><?= htmlspecialchars((string)$v['modele']) ?></td>
+              <td><?= htmlspecialchars((string)$v['immatriculation']) ?></td>
+              <td><?= htmlspecialchars((string)$v['energie']) ?></td>
+              <td><?= htmlspecialchars((string)$v['couleur']) ?></td>
+              <td><?= htmlspecialchars((string)$v['date_premiere_immatriculation']) ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
   <?php endif; ?>
+</div>
 
-  <hr>
-
+<div class="card">
   <h2>Ajouter un véhicule</h2>
 
-  <form method="post" action="<?= BASE_URL ?>/account/vehicles">
-    <label>Marque :
-      <select name="id_marque">
+  <form method="post" action="<?= BASE_URL ?>/account/vehicles" class="form">
+    <div class="form-row">
+      <label for="id_marque">Marque (optionnel)</label>
+      <select id="id_marque" name="id_marque">
         <option value="0">-- (optionnel) --</option>
         <?php foreach ($marques as $m): ?>
-          <option value="<?= (int)$m['id_marque'] ?>"><?= htmlspecialchars((string)$m['libelle']) ?></option>
+          <option value="<?= (int)$m['id_marque'] ?>">
+            <?= htmlspecialchars((string)$m['libelle']) ?>
+          </option>
         <?php endforeach; ?>
       </select>
-    </label><br><br>
+    </div>
 
-    <label>Modèle* : <input name="modele" required></label><br>
-    <label>Immatriculation* : <input name="immatriculation" required></label><br>
-    <label>Energie* : <input name="energie" required placeholder="electrique, essence, diesel..."></label><br>
-    <label>Couleur : <input name="couleur"></label><br>
-    <label>Date 1ère immat. : <input name="date_premiere_immatriculation" placeholder="YYYY-MM-DD"></label><br><br>
+    <div class="form-row">
+      <label for="modele">Modèle *</label>
+      <input id="modele" name="modele" required>
+    </div>
 
-    <button type="submit">Ajouter</button>
+    <div class="form-row">
+      <label for="immatriculation">Immatriculation *</label>
+      <input id="immatriculation" name="immatriculation" required>
+    </div>
+
+    <div class="form-row">
+      <label for="energie">Énergie *</label>
+      <input id="energie" name="energie" required placeholder="electrique, essence, diesel...">
+    </div>
+
+    <div class="form-row">
+      <label for="couleur">Couleur</label>
+      <input id="couleur" name="couleur">
+    </div>
+
+    <div class="form-row">
+      <label for="date_premiere_immatriculation">Date 1ère immat.</label>
+      <input id="date_premiere_immatriculation" name="date_premiere_immatriculation" placeholder="YYYY-MM-DD">
+    </div>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">Ajouter</button>
+      <a class="btn btn-secondary" href="<?= BASE_URL ?>/account">Retour</a>
+    </div>
   </form>
-
-</body>
-</html>
+</div>
