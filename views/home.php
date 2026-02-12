@@ -1,12 +1,9 @@
 <?php // views/home.php (contenu uniquement) ?>
 
 <div class="card">
-  <h1>EcoRide</h1>
-  <p class="muted">Plateforme de covoiturage écologique (déplacements en voiture uniquement).</p>
-
   <img class="hero-img"
-       src="https://picsum.photos/seed/ecoride1/1100/320"
-       alt="Covoiturage écologique">
+      src="<?= BASE_URL ?>/assets/images/bandeau.jpg"
+      alt="EcoRide - covoiturage écologique">
 </div>
 
 <br>
