@@ -3,16 +3,85 @@
 <div class="card">
   <h1>Résultats de recherche</h1>
 
-  <p class="muted">
-    Filtres :
-    départ=<strong><?= htmlspecialchars((string)($depart ?? '')) ?></strong>,
-    arrivée=<strong><?= htmlspecialchars((string)($arrivee ?? '')) ?></strong>,
-    date=<strong><?= htmlspecialchars((string)($date ?? '')) ?></strong>,
-    prixMax=<strong><?= htmlspecialchars((string)($prixMax ?? '')) ?></strong>,
-    eco=<strong><?= ($ecoOnly ? 'Oui' : 'Non') ?></strong>
-  </p>
+  <form id="filtersForm" method="get" action="<?= BASE_URL ?>/covoiturages" style="margin-top: 12px;">
+    <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:end;">
 
-  <p>
+      <div>
+        <label class="muted" for="depart">Départ</label><br>
+        <select id="depart" name="depart" data-auto-submit="1">
+          <option value="">-- Tous --</option>
+          <?php foreach (($departOptions ?? []) as $opt): ?>
+            <option value="<?= htmlspecialchars($opt) ?>" <?= ($depart === $opt ? 'selected' : '') ?>>
+              <?= htmlspecialchars($opt) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div>
+        <label class="muted" for="arrivee">Arrivée</label><br>
+        <select id="arrivee" name="arrivee" data-auto-submit="1">
+          <option value="">-- Toutes --</option>
+          <?php foreach (($arriveeOptions ?? []) as $opt): ?>
+            <option value="<?= htmlspecialchars($opt) ?>" <?= ($arrivee === $opt ? 'selected' : '') ?>>
+              <?= htmlspecialchars($opt) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div>
+        <label class="muted" for="chauffeur">Chauffeur</label><br>
+        <select id="chauffeur" name="chauffeur" data-auto-submit="1">
+          <option value="">-- Tous --</option>
+          <?php foreach (($chauffeurOptions ?? []) as $opt): ?>
+            <option value="<?= htmlspecialchars($opt) ?>" <?= (($chauffeur ?? '') === $opt ? 'selected' : '') ?>>
+              <?= htmlspecialchars($opt) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div>
+        <label class="muted" for="date">Date</label><br>
+        <input id="date" type="date" name="date" value="<?= htmlspecialchars((string)($date ?? '')) ?>" data-auto-submit="1">
+      </div>
+
+      <div>
+        <label class="muted" for="prixMax">Prix max</label><br>
+        <input id="prixMax" type="number" min="0" name="prixMax" value="<?= htmlspecialchars((string)($prixMax ?? '')) ?>" data-auto-submit="1">
+      </div>
+
+      <div>
+        <label class="muted" for="noteMin">Note min</label><br>
+        <select id="noteMin" name="noteMin" data-auto-submit="1">
+          <option value="">-- indifférent --</option>
+          <?php
+            $notes = [1,2,3,4,4.5,5];
+            foreach ($notes as $n):
+              $val = (string)$n;
+          ?>
+            <option value="<?= htmlspecialchars($val) ?>" <?= (isset($noteMin) && (string)$noteMin === $val ? 'selected' : '') ?>>
+              <?= htmlspecialchars($val) ?>+
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input id="eco" type="checkbox" name="eco" value="1" <?= ($ecoOnly ? 'checked' : '') ?> data-auto-submit="1">
+        <label for="eco">Éco (électrique)</label>
+      </div>
+
+      <div>
+        <button type="submit">Filtrer</button>
+        <a href="<?= BASE_URL ?>/covoiturages" style="margin-left:8px;">Réinitialiser</a>
+      </div>
+
+    </div>
+  </form>
+
+  <p style="margin-top: 10px;">
     <a href="<?= BASE_URL ?>/">← Nouvelle recherche</a>
   </p>
 </div>
@@ -31,6 +100,8 @@
         <th>Départ</th>
         <th>Arrivée</th>
         <th>Date / Heure</th>
+        <th>Chauffeur</th>
+        <th>Note</th>
         <th>Places</th>
         <th>Prix</th>
         <th>Éco</th>
@@ -39,7 +110,10 @@
     </thead>
     <tbody>
     <?php foreach ($results as $row): ?>
-      <?php $eco = isset($row['energie']) && stripos((string)$row['energie'], 'elect') !== false; ?>
+      <?php
+        $eco = isset($row['energie']) && stripos((string)$row['energie'], 'elect') !== false;
+        $note = $row['chauffeur_note'] ?? null;
+      ?>
       <tr>
         <td><?= htmlspecialchars((string)$row['lieu_depart']) ?></td>
         <td><?= htmlspecialchars((string)$row['lieu_arrivee']) ?></td>
@@ -47,6 +121,8 @@
           <?= htmlspecialchars((string)$row['date_depart']) ?>
           <?= htmlspecialchars((string)$row['heure_depart']) ?>
         </td>
+        <td><?= htmlspecialchars((string)($row['chauffeur_pseudo'] ?? '—')) ?></td>
+        <td><?= ($note !== null ? htmlspecialchars((string)$note) : '—') ?></td>
         <td><?= htmlspecialchars((string)$row['nb_place']) ?></td>
         <td><?= htmlspecialchars((string)$row['prix_personne']) ?> crédits</td>
         <td><?= $eco ? 'Oui' : 'Non' ?></td>
@@ -58,3 +134,13 @@
     </tbody>
   </table>
 <?php endif; ?>
+
+<script>
+  (function () {
+    const form = document.querySelector('#filtersForm');
+    if (!form) return;
+    form.querySelectorAll('[data-auto-submit="1"]').forEach(el => {
+      el.addEventListener('change', () => form.submit());
+    });
+  })();
+</script>

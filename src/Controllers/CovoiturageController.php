@@ -12,9 +12,17 @@ final class CovoiturageController
         // Filtres optionnels (on les ajoutera ensuite dans l’IHM)
         $prixMax = isset($_GET['prixMax']) && $_GET['prixMax'] !== '' ? (int)$_GET['prixMax'] : null;
         $ecoOnly = isset($_GET['eco']) ? (($_GET['eco'] === '1') || ($_GET['eco'] === 'true')) : null;
+        $chauffeur = isset($_GET['chauffeur']) ? trim((string)$_GET['chauffeur']) : '';
+        if ($chauffeur === '') $chauffeur = null;
+        $noteMin = isset($_GET['noteMin']) && $_GET['noteMin'] !== '' ? (float)$_GET['noteMin'] : null;
 
         $repo = new CovoiturageRepository();
-        $results = $repo->search($depart, $arrivee, $date, $prixMax, $ecoOnly);
+
+        $departOptions  = $repo->getDepartOptions();
+        $arriveeOptions = $repo->getArriveeOptions();
+        $chauffeurOptions = $repo->getChauffeurOptions();
+
+        $results = $repo->search($depart, $arrivee, $date, $prixMax, $ecoOnly, $noteMin, $chauffeur);
 
         $title = "Covoiturages";
         $viewFile = __DIR__ . '/../../views/covoiturage/list.php';

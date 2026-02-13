@@ -10,10 +10,18 @@ final class CovoiturageRepository
         $this->pdo = $pdo ?? Database::pdo();
     }
 
-    public function search(?string $depart, ?string $arrivee, ?string $date, ?int $prixMax = null, ?bool $ecoOnly = null): array
+    public function search(
+            ?string $depart,
+            ?string $arrivee,
+            ?string $date,
+            ?int $prixMax = null,
+            ?bool $ecoOnly = null,
+            ?float $noteMin = null,
+            ?string $chauffeurPseudo = null
+        ): array
     {
         $sql = "
-            SELECT
+            SELECT DISTINCT
                 c.id_covoiturage,
                 c.date_depart,
                 c.heure_depart,
@@ -24,10 +32,32 @@ final class CovoiturageRepository
                 c.statut,
                 c.nb_place,
                 c.prix_personne,
-                v.energie
+
+                v.energie,
+
+                u.pseudo AS chauffeur_pseudo,
+                n.note_moy AS chauffeur_note
+
             FROM covoiturage c
-            LEFT JOIN utilise u ON u.id_covoiturage = c.id_covoiturage
-            LEFT JOIN voiture v  ON v.id_voiture = u.id_voiture
+            LEFT JOIN utilise ul ON ul.id_covoiturage = c.id_covoiturage
+            LEFT JOIN voiture v  ON v.id_voiture = ul.id_voiture
+            LEFT JOIN gere g     ON g.id_voiture = v.id_voiture
+            LEFT JOIN utilisateur u ON u.id_utilisateur = g.id_utilisateur
+
+            LEFT JOIN (
+                SELECT
+                    g2.id_utilisateur AS id_chauffeur,
+                    ROUND(AVG(a.note), 1) AS note_moy
+                FROM avis a
+                INNER JOIN covoiturage c2 ON c2.id_covoiturage = a.id_covoiturage
+                INNER JOIN utilise ul2    ON ul2.id_covoiturage = c2.id_covoiturage
+                INNER JOIN voiture v2     ON v2.id_voiture = ul2.id_voiture
+                INNER JOIN gere g2        ON g2.id_voiture = v2.id_voiture
+                WHERE a.statut = 'VALIDE'
+                AND a.note IS NOT NULL
+                GROUP BY g2.id_utilisateur
+            ) n ON n.id_chauffeur = u.id_utilisateur
+
             WHERE c.statut = 'PLANIFIE'
         ";
 
@@ -54,8 +84,19 @@ final class CovoiturageRepository
         }
 
         if ($ecoOnly === true) {
-            // Interprétation simple : un voyage est "éco" si energie contient "ELECT"
-            $sql .= " AND (v.energie LIKE '%ELECT%')";
+            // “éco” si énergie contient "elect"
+            $sql .= " AND (LOWER(v.energie) LIKE '%elect%')";
+        }
+
+        if ($noteMin !== null) {
+            // COALESCE : si pas de note, on considère 0
+            $sql .= " AND COALESCE(n.note_moy, 0) >= :noteMin";
+            $params[':noteMin'] = $noteMin;
+        }
+
+        if ($chauffeurPseudo !== null && $chauffeurPseudo !== '') {
+            $sql .= " AND u.pseudo = :chauffeurPseudo";
+            $params[':chauffeurPseudo'] = $chauffeurPseudo;
         }
 
         $sql .= " ORDER BY c.date_depart ASC, c.heure_depart ASC";
@@ -64,6 +105,7 @@ final class CovoiturageRepository
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
+
 
     public function findById(int $id): ?array
     {
@@ -476,5 +518,45 @@ final class CovoiturageRepository
             $this->pdo->rollBack();
             throw $e;
         }
+    }
+
+    public function getDepartOptions(): array
+    {
+        $sql = "
+            SELECT DISTINCT lieu_depart AS val
+            FROM covoiturage
+            WHERE statut = 'PLANIFIE'
+            ORDER BY lieu_depart
+        ";
+        $stmt = $this->pdo->query($sql);
+        return array_map(fn($r) => (string)$r['val'], $stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    public function getArriveeOptions(): array
+    {
+        $sql = "
+            SELECT DISTINCT lieu_arrivee AS val
+            FROM covoiturage
+            WHERE statut = 'PLANIFIE'
+            ORDER BY lieu_arrivee
+        ";
+        $stmt = $this->pdo->query($sql);
+        return array_map(fn($r) => (string)$r['val'], $stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    public function getChauffeurOptions(): array
+    {
+        $sql = "
+            SELECT DISTINCT u.pseudo AS val
+            FROM covoiturage c
+            JOIN utilise ul    ON ul.id_covoiturage = c.id_covoiturage
+            JOIN voiture v     ON v.id_voiture = ul.id_voiture
+            JOIN gere g        ON g.id_voiture = v.id_voiture
+            JOIN utilisateur u ON u.id_utilisateur = g.id_utilisateur
+            WHERE c.statut = 'PLANIFIE'
+            ORDER BY u.pseudo
+        ";
+        $stmt = $this->pdo->query($sql);
+        return array_map(fn($r) => (string)$r['val'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 }
