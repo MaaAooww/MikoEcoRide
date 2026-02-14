@@ -131,10 +131,21 @@ final class CovoiturageRepository
                 v.immatriculation,
                 v.energie,
                 v.couleur,
-                v.date_premiere_immatriculation
+                v.date_premiere_immatriculation,
+
+                COALESCE(p.nb_participants, 0) AS places_prises,
+                GREATEST(c.nb_place - COALESCE(p.nb_participants, 0), 0) AS places_restantes
+
             FROM covoiturage c
             LEFT JOIN utilise u ON u.id_covoiturage = c.id_covoiturage
             LEFT JOIN voiture v  ON v.id_voiture = u.id_voiture
+
+            LEFT JOIN (
+                SELECT id_covoiturage, COUNT(*) AS nb_participants
+                FROM participe
+                GROUP BY id_covoiturage
+            ) p ON p.id_covoiturage = c.id_covoiturage
+
             WHERE c.id_covoiturage = :id
             LIMIT 1
         ";
@@ -237,32 +248,71 @@ final class CovoiturageRepository
         ]);
     }
 
-    public function findTripsAsPassenger(int $idUtilisateur): array
+    public function findTripsAsPassenger(int $idUtilisateur, string $statut = ''): array
     {
         $sql = "
-            SELECT c.*
+            SELECT
+                c.*,
+                COALESCE(p.nb_participants, 0) AS places_prises,
+                GREATEST(c.nb_place - COALESCE(p.nb_participants, 0), 0) AS places_restantes
             FROM covoiturage c
-            INNER JOIN participe p ON p.id_covoiturage = c.id_covoiturage
-            WHERE p.id_utilisateur = :u
+            INNER JOIN participe pa ON pa.id_covoiturage = c.id_covoiturage
+            LEFT JOIN (
+                SELECT id_covoiturage, COUNT(*) AS nb_participants
+                FROM participe
+                GROUP BY id_covoiturage
+            ) p ON p.id_covoiturage = c.id_covoiturage
+            WHERE pa.id_utilisateur = :u
+        ";
+
+        $params = [':u' => $idUtilisateur];
+
+        if ($statut !== '') {
+            $sql .= " AND c.statut = :statut";
+            $params[':statut'] = $statut;
+        }
+
+        $sql .= "
             ORDER BY c.date_depart DESC, c.heure_depart DESC
         ";
+
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':u' => $idUtilisateur]);
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function findTripsAsDriver(int $idUtilisateur): array
+    public function findTripsAsDriver(int $idUtilisateur, string $statut = ''): array
     {
         $sql = "
-            SELECT DISTINCT c.*
+            SELECT DISTINCT
+                c.*,
+                COALESCE(p.nb_participants, 0) AS places_prises,
+                GREATEST(c.nb_place - COALESCE(p.nb_participants, 0), 0) AS places_restantes
             FROM covoiturage c
             INNER JOIN utilise u ON u.id_covoiturage = c.id_covoiturage
             INNER JOIN gere g ON g.id_voiture = u.id_voiture
+            LEFT JOIN (
+                SELECT id_covoiturage, COUNT(*) AS nb_participants
+                FROM participe
+                GROUP BY id_covoiturage
+            ) p ON p.id_covoiturage = c.id_covoiturage
             WHERE g.id_utilisateur = :u
+        ";
+
+        $params = [':u' => $idUtilisateur];
+
+        if ($statut !== '') {
+            $sql .= " AND c.statut = :statut";
+            $params[':statut'] = $statut;
+        }
+
+        // ✅ FIN de requête seulement après avoir ajouté le filtre
+        $sql .= "
             ORDER BY c.date_depart DESC, c.heure_depart DESC
         ";
+
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':u' => $idUtilisateur]);
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

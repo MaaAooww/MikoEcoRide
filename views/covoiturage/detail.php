@@ -22,8 +22,13 @@
       (<?= htmlspecialchars((string)$covoit['date_arrivee']) ?> <?= htmlspecialchars((string)$covoit['heure_arrivee']) ?>)
     </li>
 
-    <li><strong>Places :</strong> <?= htmlspecialchars((string)$covoit['nb_place']) ?></li>
-    <li><strong>Prix :</strong> <?= htmlspecialchars((string)$covoit['prix_personne']) ?> crédits</li>
+    <li>
+      <strong>Places :</strong>
+      <?= (int)$covoit['nb_place'] ?>
+      (prises : <?= (int)$covoit['places_prises'] ?>,
+      restantes : <?= (int)$covoit['places_restantes'] ?>)
+    </li>
+  <li><strong>Prix :</strong> <?= htmlspecialchars((string)$covoit['prix_personne']) ?> crédits</li>
   </ul>
 </div>
 

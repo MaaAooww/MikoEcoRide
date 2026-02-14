@@ -266,12 +266,16 @@ final class AccountController
 
         $idUtilisateur = (int)$_SESSION['user']['id_utilisateur'];
 
+        $allowedStatuses = ['PLANIFIE', 'VALIDE', 'ANNULE', 'TERMINE', 'INCIDENT'];
+        $statut = $_GET['statut'] ?? '';
+        $statut = in_array($statut, $allowedStatuses, true) ? $statut : '';
+
         $pdo = Database::pdo();
         $repoCov = new CovoiturageRepository($pdo);
         $repoUser = new UtilisateurRepository($pdo);
-
-        $tripsPassenger = $repoCov->findTripsAsPassenger($idUtilisateur);
-        $tripsDriver = $repoCov->findTripsAsDriver($idUtilisateur);
+ 
+        $tripsPassenger = $repoCov->findTripsAsPassenger($idUtilisateur, $statut);
+        $tripsDriver = $repoCov->findTripsAsDriver($idUtilisateur, $statut);
 
         $success = $_SESSION['flash_success'] ?? null;
         $error = $_SESSION['flash_error'] ?? null;
