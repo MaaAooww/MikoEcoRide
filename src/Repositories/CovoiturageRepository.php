@@ -11,14 +11,15 @@ final class CovoiturageRepository
     }
 
     public function search(
-            ?string $depart,
-            ?string $arrivee,
-            ?string $date,
-            ?int $prixMax = null,
-            ?bool $ecoOnly = null,
-            ?float $noteMin = null,
-            ?string $chauffeurPseudo = null
-        ): array
+        ?string $depart,
+        ?string $arrivee,
+        ?string $date,
+        ?int $prixMax = null,
+        ?bool $ecoOnly = null,
+        ?float $noteMin = null,
+        ?string $chauffeurPseudo = null,
+        ?int $placesMin = null
+    ): array
     {
         $sql = "
             SELECT DISTINCT
@@ -36,13 +37,21 @@ final class CovoiturageRepository
                 v.energie,
 
                 u.pseudo AS chauffeur_pseudo,
-                n.note_moy AS chauffeur_note
+                n.note_moy AS chauffeur_note,
+
+                GREATEST(c.nb_place - COALESCE(p.nb_participants, 0), 0) AS places_restantes
 
             FROM covoiturage c
             LEFT JOIN utilise ul ON ul.id_covoiturage = c.id_covoiturage
             LEFT JOIN voiture v  ON v.id_voiture = ul.id_voiture
             LEFT JOIN gere g     ON g.id_voiture = v.id_voiture
             LEFT JOIN utilisateur u ON u.id_utilisateur = g.id_utilisateur
+
+            LEFT JOIN (
+                SELECT id_covoiturage, COUNT(*) AS nb_participants
+                FROM participe
+                GROUP BY id_covoiturage
+            ) p ON p.id_covoiturage = c.id_covoiturage
 
             LEFT JOIN (
                 SELECT
@@ -84,12 +93,10 @@ final class CovoiturageRepository
         }
 
         if ($ecoOnly === true) {
-            // “éco” si énergie contient "elect"
             $sql .= " AND (LOWER(v.energie) LIKE '%elect%')";
         }
 
         if ($noteMin !== null) {
-            // COALESCE : si pas de note, on considère 0
             $sql .= " AND COALESCE(n.note_moy, 0) >= :noteMin";
             $params[':noteMin'] = $noteMin;
         }
@@ -99,13 +106,21 @@ final class CovoiturageRepository
             $params[':chauffeurPseudo'] = $chauffeurPseudo;
         }
 
+        if ($placesMin !== null) {
+            $sql .= " AND (c.nb_place - COALESCE(p.nb_participants, 0)) >= :placesMin";
+            $params[':placesMin'] = $placesMin;
+        }
+
+        // ✅ Conforme US3 : afficher uniquement les covoiturages avec des places restantes
+        // Si tu veux conserver aussi ceux complets, commente cette ligne.
+        $sql .= " AND (c.nb_place - COALESCE(p.nb_participants, 0)) > 0 ";
+
         $sql .= " ORDER BY c.date_depart ASC, c.heure_depart ASC";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
-
 
     public function findById(int $id): ?array
     {

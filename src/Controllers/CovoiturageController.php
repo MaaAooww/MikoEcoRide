@@ -14,6 +14,7 @@ final class CovoiturageController
         $ecoOnly = isset($_GET['eco']) ? (($_GET['eco'] === '1') || ($_GET['eco'] === 'true')) : null;
         $chauffeur = isset($_GET['chauffeur']) ? trim((string)$_GET['chauffeur']) : '';
         if ($chauffeur === '') $chauffeur = null;
+        $placesMin = isset($_GET['placesMin']) && $_GET['placesMin'] !== '' ? (int)$_GET['placesMin'] : null;
         $noteMin = isset($_GET['noteMin']) && $_GET['noteMin'] !== '' ? (float)$_GET['noteMin'] : null;
 
         $repo = new CovoiturageRepository();
@@ -22,7 +23,7 @@ final class CovoiturageController
         $arriveeOptions = $repo->getArriveeOptions();
         $chauffeurOptions = $repo->getChauffeurOptions();
 
-        $results = $repo->search($depart, $arrivee, $date, $prixMax, $ecoOnly, $noteMin, $chauffeur);
+        $results = $repo->search($depart, $arrivee, $date, $prixMax, $ecoOnly, $noteMin, $chauffeur, $placesMin);
 
         $title = "Covoiturages";
         $viewFile = __DIR__ . '/../../views/covoiturage/list.php';

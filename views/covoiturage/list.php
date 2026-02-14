@@ -43,13 +43,28 @@
       </div>
 
       <div>
+        <label class="muted" for="placesMin">Places restantes</label><br>
+        <select id="placesMin" name="placesMin" data-auto-submit="1">
+          <option value="">-- indifférent --</option>
+          <?php foreach ([1,2,3,4,5,6] as $n): ?>
+            <option value="<?= $n ?>" <?= (isset($placesMin) && (int)$placesMin === $n ? 'selected' : '') ?>>
+              <?= $n ?>+
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div>
         <label class="muted" for="date">Date</label><br>
         <input id="date" type="date" name="date" value="<?= htmlspecialchars((string)($date ?? '')) ?>" data-auto-submit="1">
       </div>
 
       <div>
         <label class="muted" for="prixMax">Prix max</label><br>
-        <input id="prixMax" type="number" min="0" name="prixMax" value="<?= htmlspecialchars((string)($prixMax ?? '')) ?>" data-auto-submit="1">
+        <input id="prixMax" type="number" min="0" name="prixMax"
+              value="<?= htmlspecialchars((string)($prixMax ?? '')) ?>"
+              data-auto-submit="1"
+              style="width:100px;">
       </div>
 
       <div>
@@ -70,7 +85,7 @@
 
       <div style="display:flex; gap:8px; align-items:center;">
         <input id="eco" type="checkbox" name="eco" value="1" <?= ($ecoOnly ? 'checked' : '') ?> data-auto-submit="1">
-        <label for="eco">Éco (électrique)</label>
+        <label for="eco">Éco</label>
       </div>
 
       <div>
@@ -102,7 +117,7 @@
         <th>Date / Heure</th>
         <th>Chauffeur</th>
         <th>Note</th>
-        <th>Places</th>
+        <th>Places<br>restantes</th>
         <th>Prix</th>
         <th>Éco</th>
         <th></th>
@@ -123,7 +138,7 @@
         </td>
         <td><?= htmlspecialchars((string)($row['chauffeur_pseudo'] ?? '—')) ?></td>
         <td><?= ($note !== null ? htmlspecialchars((string)$note) : '—') ?></td>
-        <td><?= htmlspecialchars((string)$row['nb_place']) ?></td>
+        <td><?= htmlspecialchars((string)$row['places_restantes']) ?></td>
         <td><?= htmlspecialchars((string)$row['prix_personne']) ?> crédits</td>
         <td><?= $eco ? 'Oui' : 'Non' ?></td>
         <td>

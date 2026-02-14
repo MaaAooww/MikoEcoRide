@@ -14,17 +14,17 @@
   <form method="get" action="<?= BASE_URL ?>/covoiturages" class="form-grid">
     <label>
       Départ
-      <input name="depart" required>
+      <input name="depart" placeholder="Ex: Lyon">
     </label>
 
     <label>
       Arrivée
-      <input name="arrivee" required>
+      <input name="arrivee" placeholder="Ex: Paris">
     </label>
 
     <label>
       Date
-      <input type="date" name="date" required>
+      <input type="date" name="date">
     </label>
 
     <label>
