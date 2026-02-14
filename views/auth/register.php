@@ -17,6 +17,16 @@
       <input type="text" name="pseudo" required autocomplete="nickname">
     </label>
 
+    <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" name="prenom" required>
+    </div>
+
+    <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" name="nom" required>
+    </div>
+
     <label>
       Email
       <input type="email" name="email" required autocomplete="email">
@@ -27,6 +37,11 @@
       <input type="password" name="password" required autocomplete="new-password">
       <span class="muted">Minimum : 8 caractères (recommandé : lettres + chiffres).</span>
     </label>
+
+    <div class="form-group">
+        <label for="password2">Confirmer le mot de passe</label>
+        <input type="password" id="password2" name="password2" required>
+    </div>
 
     <button type="submit">Créer mon compte</button>
   </form>

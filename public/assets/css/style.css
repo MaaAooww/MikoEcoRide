@@ -131,13 +131,6 @@ button:hover{ background: var(--brand-2); }
   background: #f3f4f6;
 }
 
-.footer{
-  margin-top: auto;
-  padding: 18px 0;
-  border-top: 1px solid var(--border);
-  background: var(--card);
-}
-
 .hero-img{
   width: 100%;
   height: auto; /* height: 320px; */
@@ -242,4 +235,30 @@ body > * {
 /* Champs compacts (prix, note, places) */
 .input-small {
     width: 100px;
+}
+
+/* ===== FOOTER ECO RIDE ===== */
+
+.footer {
+    background-color: #ffffff;
+    padding: 20px 0;
+    text-align: center;
+    border-top: 1px solid #e5e5e5;
+    margin-top: 40px;
+}
+
+.footer p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.footer a {
+    color: #2e8b57; /* vert EcoRide */
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer a:hover {
+    text-decoration: underline;
 }

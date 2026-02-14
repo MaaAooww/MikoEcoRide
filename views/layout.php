@@ -25,7 +25,6 @@ if (!isset($viewFile) || !is_string($viewFile)) {
         <a href="<?= BASE_URL ?>/"><strong>EcoRide</strong></a>
         <a href="<?= BASE_URL ?>/covoiturages">Covoiturages</a>
         <a href="<?= BASE_URL ?>/contact">Contact</a>
-        <a href="<?= BASE_URL ?>/mentions-legales">Mentions légales</a>
       </div>
 
       <div class="nav-right">
@@ -55,7 +54,12 @@ if (!isset($viewFile) || !is_string($viewFile)) {
 
 <footer class="footer">
   <div class="container">
-    <p>Contact : <a href="mailto:contact@ecoride.fr">contact@ecoride.fr</a></p>
+    <p>
+      Contact :
+      <a href="mailto:contact@ecoride.fr">contact@ecoride.fr</a>
+      &nbsp;|&nbsp;
+      <a href="<?= BASE_URL ?>/mentions-legales">Mentions légales</a>
+    </p>
   </div>
 </footer>
 

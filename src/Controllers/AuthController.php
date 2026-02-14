@@ -5,9 +5,6 @@ final class AuthController
 {
     public function registerForm(): void
     {
-        $error = $_SESSION['flash_error'] ?? null;
-        unset($_SESSION['flash_error']);
-
         $title = "Inscription";
         $viewFile = __DIR__ . '/../../views/auth/register.php';
         require __DIR__ . '/../../views/layout.php';
@@ -50,9 +47,7 @@ final class AuthController
             exit;
         }
 
-        // ⚠️ IMPORTANT : utilise la même méthode que ton projet.
-        // Si ton Database.php expose Database::getConnection(), utilise ça :
-        $pdo = Database::getConnection(); // <-- ou Database::pdo() si c'est bien le nom chez toi
+        $pdo = Database::pdo();
 
         $pdo->beginTransaction();
 
@@ -104,9 +99,6 @@ final class AuthController
 
     public function loginForm(): void
     {
-        $error = $_SESSION['flash_error'] ?? null;
-        unset($_SESSION['flash_error']);
-
         $title = "Connexion";
         $viewFile = __DIR__ . '/../../views/auth/login.php';
         require __DIR__ . '/../../views/layout.php';
