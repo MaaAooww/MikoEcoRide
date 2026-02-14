@@ -220,3 +220,26 @@ body > * {
     position: relative;
     z-index: 1;
 }
+
+/* Largeurs harmonisées pour les filtres */
+
+.filter-group select,
+.filter-group input {
+    height: 36px;
+    box-sizing: border-box;
+}
+
+/* Champs larges (villes, chauffeur) */
+.input-large {
+    width: 180px;
+}
+
+/* Champs moyens (date) */
+.input-medium {
+    width: 150px;
+}
+
+/* Champs compacts (prix, note, places) */
+.input-small {
+    width: 100px;
+}

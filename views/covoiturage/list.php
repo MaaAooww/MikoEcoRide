@@ -1,14 +1,14 @@
 <?php // views/covoiturage/list.php (contenu uniquement) ?>
 
 <div class="card">
-  <h1>Résultats de recherche</h1>
+  <h1>Liste des covoiturages</h1>
 
-  <form id="filtersForm" method="get" action="<?= BASE_URL ?>/covoiturages" style="margin-top: 12px;">
+  <form id="filtersForm" method="get" action="<?= BASE_URL ?>/covoiturages" class="filter-group">
     <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:end;">
 
       <div>
         <label class="muted" for="depart">Départ</label><br>
-        <select id="depart" name="depart" data-auto-submit="1">
+        <select id="depart" class="input-large" name="depart" data-auto-submit="1">
           <option value="">-- Tous --</option>
           <?php foreach (($departOptions ?? []) as $opt): ?>
             <option value="<?= htmlspecialchars($opt) ?>" <?= ($depart === $opt ? 'selected' : '') ?>>
@@ -20,7 +20,7 @@
 
       <div>
         <label class="muted" for="arrivee">Arrivée</label><br>
-        <select id="arrivee" name="arrivee" data-auto-submit="1">
+        <select id="arrivee" class="input-large" name="arrivee" data-auto-submit="1">
           <option value="">-- Toutes --</option>
           <?php foreach (($arriveeOptions ?? []) as $opt): ?>
             <option value="<?= htmlspecialchars($opt) ?>" <?= ($arrivee === $opt ? 'selected' : '') ?>>
@@ -32,7 +32,7 @@
 
       <div>
         <label class="muted" for="chauffeur">Chauffeur</label><br>
-        <select id="chauffeur" name="chauffeur" data-auto-submit="1">
+        <select id="chauffeur" class="input-large" name="chauffeur" data-auto-submit="1">
           <option value="">-- Tous --</option>
           <?php foreach (($chauffeurOptions ?? []) as $opt): ?>
             <option value="<?= htmlspecialchars($opt) ?>" <?= (($chauffeur ?? '') === $opt ? 'selected' : '') ?>>
@@ -44,7 +44,7 @@
 
       <div>
         <label class="muted" for="placesMin">Places restantes</label><br>
-        <select id="placesMin" name="placesMin" data-auto-submit="1">
+        <select id="placesMin" name="placesMin" class="input-small" data-auto-submit="1">
           <option value="">-- indifférent --</option>
           <?php foreach ([1,2,3,4,5,6] as $n): ?>
             <option value="<?= $n ?>" <?= (isset($placesMin) && (int)$placesMin === $n ? 'selected' : '') ?>>
@@ -56,20 +56,20 @@
 
       <div>
         <label class="muted" for="date">Date</label><br>
-        <input id="date" type="date" name="date" value="<?= htmlspecialchars((string)($date ?? '')) ?>" data-auto-submit="1">
+        <input id="date" class="input-medium" type="date" name="date" value="<?= htmlspecialchars((string)($date ?? '')) ?>" data-auto-submit="1">
       </div>
 
       <div>
         <label class="muted" for="prixMax">Prix max</label><br>
         <input id="prixMax" type="number" min="0" name="prixMax"
+              class="input-small"
               value="<?= htmlspecialchars((string)($prixMax ?? '')) ?>"
-              data-auto-submit="1"
-              style="width:100px;">
+              data-auto-submit="1">
       </div>
 
       <div>
         <label class="muted" for="noteMin">Note min</label><br>
-        <select id="noteMin" name="noteMin" data-auto-submit="1">
+        <select id="noteMin" name="noteMin" class="input-small" data-auto-submit="1">
           <option value="">-- indifférent --</option>
           <?php
             $notes = [1,2,3,4,4.5,5];
@@ -85,7 +85,7 @@
 
       <div style="display:flex; gap:8px; align-items:center;">
         <input id="eco" type="checkbox" name="eco" value="1" <?= ($ecoOnly ? 'checked' : '') ?> data-auto-submit="1">
-        <label for="eco">Éco</label>
+        <label for="eco">Éco (électrique)</label>
       </div>
 
       <div>

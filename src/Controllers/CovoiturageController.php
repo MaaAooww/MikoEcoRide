@@ -88,8 +88,12 @@ final class CovoiturageController
         }
 
         // 4) Variables attendues par la vue
-        $prixCredits = (int)$covoit['prix_personne'];
-        $error = null;
+        $covoiturage = $covoit;
+
+        $userRepo = new UtilisateurRepository();
+        $creditBalance = $userRepo->getCreditBalance((int)$_SESSION['user']['id_utilisateur']);
+
+        $errorMessage = null;
 
         $title = "Confirmation participation";
         $viewFile = __DIR__ . '/../../views/covoiturage/confirm_participation.php';
@@ -168,13 +172,21 @@ final class CovoiturageController
             // Erreur → rollback
             $pdo->rollBack();
 
-            // Réafficher la page de confirmation avec message
-            $error = $e->getMessage();
+            $errorMessage = $e->getMessage();
 
             $repo = new CovoiturageRepository();
             $covoit = $repo->findById($idCovoiturage);
 
-            $prixCredits = $covoit ? (int)$covoit['prix_personne'] : 0;
+            if (!$covoit) {
+                http_response_code(404);
+                echo "Covoiturage introuvable.";
+                return;
+            }
+
+            $covoiturage = $covoit;
+
+            $userRepo = new UtilisateurRepository();
+            $creditBalance = $userRepo->getCreditBalance((int)$_SESSION['user']['id_utilisateur']);
 
             $title = "Confirmation participation";
             $viewFile = __DIR__ . '/../../views/covoiturage/confirm_participation.php';
