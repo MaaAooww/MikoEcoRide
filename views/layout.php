@@ -55,10 +55,6 @@ if (!isset($viewFile) || !is_string($viewFile)) {
           <a href="<?= BASE_URL ?>/employe/incidents">Espace employé</a>
         <?php endif; ?>
 
-        <?php if ($isAdmin): ?>
-          <a href="<?= BASE_URL ?>/admin">Admin</a>
-        <?php endif; ?>
-
           <?php
             // Afficher le lien Admin uniquement si l'utilisateur a le rôle ADMIN
             $isAdmin = false;
