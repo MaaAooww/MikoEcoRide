@@ -34,6 +34,47 @@ if (!isset($viewFile) || !is_string($viewFile)) {
           </span>
           <a href="<?= BASE_URL ?>/account">Mon compte</a>
 
+          <?php
+
+          // Liens contextuels selon rôles (EMPLOYE / ADMIN)
+          $isEmploye = false;
+          $isAdmin = false;
+
+          try {
+              $userRepo = new UtilisateurRepository();
+              $id = (int)$_SESSION['user']['id_utilisateur'];
+
+              $isEmploye = $userRepo->hasRole($id, 'EMPLOYE');
+              $isAdmin = $userRepo->hasRole($id, 'ADMIN') || $userRepo->hasRole($id, 'ADMINISTRATEUR');
+          } catch (Throwable $e) {
+              // en cas de souci DB, on n'affiche pas les liens
+          }
+        ?>
+
+        <?php if ($isEmploye): ?>
+          <a href="<?= BASE_URL ?>/employe/incidents">Espace employé</a>
+        <?php endif; ?>
+
+        <?php if ($isAdmin): ?>
+          <a href="<?= BASE_URL ?>/admin">Admin</a>
+        <?php endif; ?>
+
+          <?php
+            // Afficher le lien Admin uniquement si l'utilisateur a le rôle ADMIN
+            $isAdmin = false;
+            try {
+                $userRepo = new UtilisateurRepository();
+                $id = (int)$_SESSION['user']['id_utilisateur'];
+                $isAdmin = $userRepo->hasRole($id, 'ADMIN') || $userRepo->hasRole($id, 'ADMINISTRATEUR');
+            } catch (Throwable $e) {
+                $isAdmin = false;
+            }
+          ?>
+
+          <?php if ($isAdmin): ?>
+            <a href="<?= BASE_URL ?>/admin">Admin</a>
+          <?php endif; ?>
+
           <form method="post" action="<?= BASE_URL ?>/logout" style="display:inline;">
             <button type="submit">Déconnexion</button>
           </form>

@@ -15,7 +15,10 @@ final class AdminController
 
         // Rôle ADMINISTRATEUR obligatoire
         $userRepo = new UtilisateurRepository();
-        if (!$userRepo->hasRole($idUtilisateur, 'ADMINISTRATEUR')) {
+        if (
+            !$userRepo->hasRole($idUtilisateur, 'ADMIN')
+            && !$userRepo->hasRole($idUtilisateur, 'ADMINISTRATEUR')
+        ) {
             header('Location: ' . BASE_URL . '/');
             exit;
         }
