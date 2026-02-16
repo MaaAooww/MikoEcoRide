@@ -1,24 +1,7 @@
 -- =========================================================
--- EcoRide - Script SQL MySQL (XAMPP / MySQL 8+)
--- Version figée (conforme à ta demande)
---
--- Objectifs :
--- 1) Garder la table CONFIGURATION avec 2 champs :
---      - id_configuration (PK auto_increment)
---      - id_utilisateur   (FK -> utilisateur.id_utilisateur)
--- 2) Supprimer la table parametre_configuration (et toute redondance)
--- 3) Avoir la table PARAMETRE comme sur ta capture :
---      - parametre_id
---      - id_configuration (FK -> configuration.id_configuration)
---      - propriete
---      - valeur
--- 4) Avoir EXACTEMENT le même jeu de données que ta capture pour :
---      - utilisateur (2 lignes : Michel, Sophie)
---      - configuration (3 lignes : (1,1) (2,1) (3,2))
---      - parametre (5 lignes, ids/valeurs identiques)
--- 5) Remplir aussi les autres tables avec quelques exemples.
--- 6) La table ROLE doit contenir 4 valeurs prédéfinies (énoncé) :
---      UTILISATEUR, CHAUFFEUR, EMPLOYE, ADMINISTRATEUR
+-- EcoRide - Script SQL MySQL 
+-- Création d'un utilisateur ADMINISTRATEUR :
+--    
 -- =========================================================
 
 DROP DATABASE IF EXISTS ecoride;
