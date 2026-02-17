@@ -6,6 +6,34 @@
       alt="EcoRide - covoiturage écologique">
 </div>
 
+<div class="card">
+    <h2>Bienvenue sur EcoRide</h2>
+
+    <p>
+        <strong>EcoRide est votre solution de covoiturage écoresponsable.</strong>
+    </p>
+
+    <p>
+        Notre mission est claire : réduire l’empreinte carbone des déplacements
+        quotidiens tout en facilitant le partage de trajets entre particuliers.
+    </p>
+
+    <p>
+        Nous sommes convaincus qu’un avenir plus durable repose sur des actions
+        simples, accessibles et collectives.
+    </p>
+
+    <p>
+        Notre plateforme met en relation conducteurs et passagers afin
+        d’optimiser les trajets, limiter les émissions de CO₂ et favoriser
+        une mobilité plus responsable, que vous habitiez en ville ou en zone rurale.
+    </p>
+
+    <p>
+        <strong>Ensemble, adoptons une mobilité plus verte et roulons vers un futur plus propre.</strong>
+    </p>
+</div>
+
 <br>
 
 <div class="card">

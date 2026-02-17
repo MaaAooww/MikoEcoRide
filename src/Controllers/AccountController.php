@@ -212,6 +212,12 @@ final class AccountController
             exit;
         }
 
+        if ($prixPers < 2) {
+            $_SESSION['flash_error'] = "Le prix par personne doit être au minimum de 2 crédits (la plateforme prélève 2 crédits par participation).";
+            header('Location: ' . BASE_URL . '/account/trips/new');
+            exit;
+        }
+
         // Vérifie que la voiture appartient au chauffeur (via gere)
         $myVehicles = $repoUser->getVehiclesByUser($idUtilisateur);
         $owned = false;
@@ -521,12 +527,15 @@ final class AccountController
                         throw new Exception("Chauffeur introuvable pour créditer.");
                     }
 
-                    $gain = (int)$trip['prix_personne'] * $nbParticipants;
+                    $prix = (int)$trip['prix_personne'];
+                    $netParParticipant = max(0, $prix - 2); // plateforme prélève 2 crédits
+                    $gain = $netParParticipant * $nbParticipants;
+
                     $repoUser->addCreditTransaction(
                         $idDriver,
                         $idCovoiturage,
                         +$gain,
-                        "Gain covoiturage #{$idCovoiturage} (validation passagers)"
+                        "Gain covoiturage #{$idCovoiturage} (validation passagers) -2 crédits/participation plateforme"
                     );
                 }
             }

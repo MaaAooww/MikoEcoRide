@@ -133,12 +133,42 @@ final class CovoiturageRepository
                 v.couleur,
                 v.date_premiere_immatriculation,
 
+                ch.id_utilisateur AS chauffeur_id,
+                ch.pseudo AS chauffeur_pseudo,
+                ch.email AS chauffeur_email,
+                ch.photo AS chauffeur_photo,
+
+                (
+                    SELECT AVG(a.note)
+                    FROM avis a
+                    JOIN covoiturage c2 ON c2.id_covoiturage = a.id_covoiturage
+                    JOIN utilise u2 ON u2.id_covoiturage = c2.id_covoiturage
+                    JOIN gere g2 ON g2.id_voiture = u2.id_voiture
+                    WHERE g2.id_utilisateur = ch.id_utilisateur
+                      AND a.statut = 'VALIDE'
+                      AND a.note IS NOT NULL
+                ) AS chauffeur_note_moyenne,
+
+                (
+                    SELECT COUNT(*)
+                    FROM avis a
+                    JOIN covoiturage c2 ON c2.id_covoiturage = a.id_covoiturage
+                    JOIN utilise u2 ON u2.id_covoiturage = c2.id_covoiturage
+                    JOIN gere g2 ON g2.id_voiture = u2.id_voiture
+                    WHERE g2.id_utilisateur = ch.id_utilisateur
+                      AND a.statut = 'VALIDE'
+                      AND a.note IS NOT NULL
+                ) AS chauffeur_nb_avis,
+
                 COALESCE(p.nb_participants, 0) AS places_prises,
                 GREATEST(c.nb_place - COALESCE(p.nb_participants, 0), 0) AS places_restantes
 
             FROM covoiturage c
             LEFT JOIN utilise u ON u.id_covoiturage = c.id_covoiturage
             LEFT JOIN voiture v  ON v.id_voiture = u.id_voiture
+
+            LEFT JOIN gere g ON g.id_voiture = v.id_voiture
+            LEFT JOIN utilisateur ch ON ch.id_utilisateur = g.id_utilisateur
 
             LEFT JOIN (
                 SELECT id_covoiturage, COUNT(*) AS nb_participants
@@ -538,7 +568,10 @@ final class CovoiturageRepository
             // 3) Montant à créditer (minimum cohérent)
             $prix = (int)($covoiturage['prix_personne'] ?? 0);
             $nbParticipants = $this->countParticipants($idCovoiturage);
-            $gain = $prix * $nbParticipants;
+
+            // La plateforme prélève 2 crédits par participation
+            $netParParticipant = max(0, $prix - 2);
+            $gain = $netParParticipant * $nbParticipants;
 
             // 4) Statut -> VALIDE
             $this->setTripStatus($idCovoiturage, 'VALIDE');
@@ -549,7 +582,7 @@ final class CovoiturageRepository
                 $idChauffeur,
                 $idCovoiturage,
                 $gain,
-                "Validation trajet par employé"
+                "Validation trajet par employé -2 crédits/participation plateforme"
             );
 
             $this->pdo->commit();

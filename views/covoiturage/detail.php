@@ -28,7 +28,27 @@
       (prises : <?= (int)$covoit['places_prises'] ?>,
       restantes : <?= (int)$covoit['places_restantes'] ?>)
     </li>
-  <li><strong>Prix :</strong> <?= htmlspecialchars((string)$covoit['prix_personne']) ?> crédits</li>
+    
+    <li>
+      <strong>Prix :</strong> <?= htmlspecialchars((string)$covoit['prix_personne']) ?> crédits
+    </li>
+
+    <?php
+      $chauffeurPseudo = (string)($covoit['chauffeur_pseudo'] ?? '');
+      $note = $covoit['chauffeur_note_moyenne'] ?? null;
+      $nbAvis = (int)($covoit['chauffeur_nb_avis'] ?? 0);
+    ?>
+
+    <li><strong>Chauffeur :</strong> <?= htmlspecialchars($chauffeurPseudo !== '' ? $chauffeurPseudo : '—') ?></li>
+
+    <li>
+      <strong>Note chauffeur :</strong>
+      <?php if ($note === null): ?>
+        —
+      <?php else: ?>
+        <?= number_format((float)$note, 1, ',', ' ') ?>/5 (<?= $nbAvis ?> avis)
+      <?php endif; ?>
+    </li>
   </ul>
 </div>
 
