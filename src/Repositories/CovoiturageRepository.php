@@ -336,7 +336,7 @@ final class CovoiturageRepository
             $params[':statut'] = $statut;
         }
 
-        // ✅ FIN de requête seulement après avoir ajouté le filtre
+        // FIN de requête seulement après avoir ajouté le filtre
         $sql .= "
             ORDER BY c.date_depart DESC, c.heure_depart DESC
         ";

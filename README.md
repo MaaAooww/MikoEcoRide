@@ -1,174 +1,201 @@
 # EcoRide – Projet ECF Développeur Web et Web Mobile
 
-Projet réalisé dans le cadre de l’**Évaluation en Cours de Formation (ECF)** du titre professionnel  
-**Développeur Web et Web Mobile (RNCP 37674 – Niveau 5)**.
+Projet réalisé dans le cadre de l’Évaluation en Cours de Formation (ECF)  
+Titre professionnel : Développeur Web et Web Mobile (RNCP 37674 – Niveau 5)
 
-EcoRide est une plateforme de **covoiturage écologique**, centrée exclusivement sur les déplacements en voiture.
-
----
-
-## 1) Objectifs du projet
-
-Ce projet a été développé conformément au cahier des charges ECF, incluant notamment :
-
-- Analyse fonctionnelle (User Stories US1 à US13)
-- Base de données relationnelle MySQL
-- Développement **Front-end** (interfaces web) et **Back-end** (PHP/PDO)
-- Gestion des rôles (UTILISATEUR, CHAUFFEUR, EMPLOYE, ADMINISTRATEUR)
-- Sécurité (sessions, hash mots de passe, requêtes préparées, échappement HTML)
-- Documentation et livrables (maquettes, charte graphique, manuel utilisateur, etc.)
+EcoRide est une application web de covoiturage écologique dédiée exclusivement aux déplacements en voiture.
 
 ---
 
-## 2) Fonctionnalités implémentées
+# 1. Contexte et objectifs
 
-### Visiteur
+L’objectif du projet est de concevoir et développer une application web complète répondant aux exigences du cahier des charges officiel EcoRide.
 
-- Accès à la page d’accueil
-- Recherche de covoiturages (ville départ, ville arrivée, date + filtres)
-- Consultation de la liste des covoiturages disponibles
-- Consultation du détail d’un covoiturage
-- Accès aux pages Contact et Mentions légales
-- Création de compte utilisateur
+Le projet couvre :
 
-### Utilisateur
-
-- Connexion / déconnexion
-- Accès à l’espace personnel
-- Consultation du solde de crédits
-- Participation à un covoiturage
-- Consultation de l’historique des trajets
-
-### Chauffeur
-
-- Gestion des véhicules
-- Création de covoiturages
-- Consultation / gestion de ses trajets (statuts)
-- Démarrage / fin de trajet
-- Signalement d’un incident
-
-### Employé
-
-- Consultation des trajets signalés en incident
-- Validation ou refus d’un trajet en incident
-- Application des règles métier associées aux crédits (validation = crédit chauffeur)
-
-### Administrateur
-
-- Tableau de bord
-- Statistiques (covoiturages par jour, crédits gagnés par la plateforme)
-- Gestion des comptes employés
-- Suspension / réactivation de comptes utilisateurs
-
-> ✅ Les User Stories **US1 à US13** sont prises en charge.  
-> ⚠️ Certaines parties ont été simplifiées par manque de temps (voir “Limitations connues”).
+- L’analyse des besoins (User Stories US1 à US13)
+- La conception de la base de données relationnelle
+- Le développement Front-End et Back-End
+- La gestion des rôles et des règles métier
+- La sécurisation de l’application
+- La documentation complète
+- La gestion de projet en Kanban
+- La préparation au déploiement
 
 ---
 
-## 3) Gestion des crédits (résumé)
+# 2. Liens officiels
 
-- 20 crédits offerts à l’inscription
-- Débit automatique lors d’une participation
-- Crédit chauffeur après validation d’un trajet
-- Historique des transactions enregistré en base
+## Dépôt GitHub public
 
----
+https://github.com/NataliaRoblin/Ecoride/tree/main
 
-## 4) Stack technique
+## Gestion de projet (Kanban Trello)
 
-### Front-end
-
-- HTML5
-- CSS3 (Bootstrap + CSS personnalisé)
-
-### Back-end
-
-- PHP 8
-- PDO (requêtes préparées)
-- Architecture MVC maison (sans framework)
-- Routeur maison (GET/POST)
-
-### Base de données
-
-- MySQL
-- Script SQL officiel : `ecoride_schema.sql`
+https://trello.com/invite/b/6994d83f077112a9c2ebdb87/ATTIde0238392ceeb204fdc015816ed3eeb32F8B38E5/ecf-ecoride
 
 ---
 
-## 5) Livrables / Documentation (dossier docs)
+# 3. Démarche technique
 
-Tous les documents demandés pour l’ECF sont versionnés dans le dépôt GitHub, dans le dossier `docs/` :
+## Architecture
 
-- **Charte graphique** : `docs/charte_graphique/Charte_graphique_EcoRide.pdf`
-- **Analyse fonctionnelle** : `docs/analyse_fonctionnelle/Analyse_fonctionnelle_EcoRide.docx` (et/ou `.pdf` si exportée)
-- **Manuel utilisateur** : `docs/manuel_utilisateur/Manuel_utilisateur_EcoRide.docx` (et/ou `.pdf` si exporté)
-- **Maquettage** (8 PNG) : `docs/maquettes/`
-  - 1.  Bureau Accueil.png
-  - 2.  Bureau liste covoiturages.png
-  - 3.  Bureau Détail covoiturage.png
-  - 4.  Bureau login.png
-  - 5.  Bureau register.png
-  - 6.  Mobile Accueil.png
-  - 7.  Mobile Liste Covoiturages.png
-  - 8.  Mobile Detail Covoiturage.png
+L’application repose sur une architecture MVC simplifiée développée sans framework afin de démontrer la maîtrise des fondamentaux :
 
----
+- Séparation des responsabilités (Controllers / Views / Repositories)
+- Routeur maison pour gestion des requêtes GET / POST
+- Accès aux données via PDO
+- Centralisation de la connexion base de données
 
-## 6) Base de données
+## Choix techniques justifiés
 
-### Script SQL officiel
-
-Le script de création et d’initialisation de la base est fourni à la racine du projet :
-
-- `ecoride_schema.sql`
-
-### Compte administrateur par défaut (créé via le script SQL)
-
-- **Pseudo** : Admin
-- **Email** : admin@ecoride.fr
-- **Mot de passe** : admineco
+- PHP natif : permet de démontrer la compréhension des mécanismes internes (sessions, routing, sécurité).
+- PDO : sécurisation via requêtes préparées.
+- Bootstrap : rapidité de mise en place et responsive design.
+- MySQL : conformité à l’exigence base relationnelle.
+- Script SQL manuel : maîtrise du SQL (pas uniquement via migrations/ORM).
 
 ---
 
-## 7) Installation locale (XAMPP)
+# 4. Fonctionnalités implémentées (conformité US)
 
-### Prérequis
+L’ensemble des User Stories US1 à US13 est pris en charge.
 
-- XAMPP (Apache + MySQL)
+## Visiteur
+
+- Page d’accueil (US1)
+- Navigation (US2)
+- Recherche + filtres (US3 & US4)
+- Détail trajet (US5)
+- Création de compte (US7)
+
+## Utilisateur
+
+- Connexion sécurisée
+- Gestion crédits
+- Participation avec double validation (US6)
+- Historique des trajets (US10)
+
+## Chauffeur
+
+- Gestion véhicules (US8)
+- Création trajet avec règle des 2 crédits plateforme (US9)
+- Démarrage / Fin trajet (US11)
+- Signalement incidents
+
+## Employé
+
+- Gestion incidents (US12)
+- Validation / refus
+- Application des règles métier sur crédits
+
+## Administrateur
+
+- Dashboard
+- Statistiques (covoiturages / crédits plateforme) (US13)
+- Gestion employés
+- Suspension comptes
+
+---
+
+# 5. Base de données
+
+Base relationnelle MySQL.
+
+Script fourni :
+
+ecoride_schema.sql
+
+Le schéma comprend notamment :
+
+- Utilisateur
+- Rôle
+- Véhicule
+- Covoiturage
+- Participation
+- Avis
+- Incident
+- Credit_transaction
+
+Les crédits sont gérés via une table de transactions permettant une traçabilité complète.
+
+---
+
+# 6. Sécurité mise en place
+
+- Hash des mots de passe via password_hash()
+- Vérification password_verify()
+- Requêtes préparées PDO (prévention SQL Injection)
+- Échappement HTML (prévention XSS)
+- Vérification des rôles côté serveur
+- Protection accès routes sensibles
+- Sessions sécurisées
+
+---
+
+# 7. Structure du projet
+
+Principaux dossiers :
+
+docs/ → livrables ECF  
+public/ → point d’entrée web  
+src/ → logique métier (Core / Controllers / Repositories)  
+views/ → templates HTML  
+config/ → configuration  
+ecoride_schema.sql → base de données
+
+---
+
+# 8. Livrables présents dans docs/
+
+- Analyse fonctionnelle
+- Charte graphique
+- Diagramme de cas d’utilisation
+- Diagrammes de séquence (US6, US9)
+- Documentation technique
+- Documentation gestion de projet
+- Manuel utilisateur
+- Maquettes (PC & Mobile)
+- MCD (Looping)
+
+---
+
+# 9. Installation locale
+
+Prérequis :
+
+- XAMPP
 - PHP 8+
-- Navigateur web moderne
 
-### Étapes
+Étapes :
 
-1. Copier/cloner le projet dans :
-   ```
+1. Copier le projet dans :
    C:\xampp\htdocs\EcoRide
-   ```
-2. Démarrer **Apache** et **MySQL** depuis XAMPP
-3. Créer une base MySQL nommée `ecoride`
-4. Importer le fichier `ecoride_schema.sql` (via phpMyAdmin)
-5. Accéder à l’application :
-   ```
+
+2. Démarrer Apache + MySQL
+
+3. Créer base : ecoride
+
+4. Importer : ecoride_schema.sql
+
+5. Accéder à :
    http://localhost/EcoRide/public/
-   ```
 
 ---
 
-## 8) Déploiement
+# 10. Compte administrateur
 
-Le déploiement n’est pas encore effectué à ce stade.  
-Une fois réalisé, la section sera mise à jour avec l’URL de l’application déployée.
+Pseudo : Admin  
+Email : admin@ecoride.fr  
+Mot de passe : admineco
 
 ---
 
-## 9) Limitations connues
+# 11. Limitations et axes d’amélioration
 
-Dans le cadre du temps imparti :
-
-- Les emails utilisés sont fictifs (pas d’envoi réel)
-- Gestion des photos utilisateur non implémentée
-- Affichage détaillé des préférences chauffeur et des avis partiellement implémenté
-- Optimisation mobile perfectible malgré une base responsive Bootstrap
-- Logo prévu dans les maquettes non intégré
+- Pas d’envoi d’email réel (simulation pédagogique)
+- Upload photo utilisateur non implémenté
+- Améliorations UX possibles
+- Améliorations sécurité avancée possibles (CSRF token, rate limiting)
 
 ---
